@@ -1,0 +1,98 @@
+default_stages: [pre-commit]
+
+fail_fast: true
+
+repos:
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+      - id: gitlint
+        name: Git - Check Commit Message
+
+  - repo: https://github.com/tekwizely/pre-commit-golang
+    rev: v1.0.0-rc.1
+    hooks:
+      #
+      # Go Build
+      #
+      - id: go-build-mod
+      #
+      # Go Mod Tidy
+      #
+      - id: go-mod-tidy
+      #
+      # StaticCheck
+      #
+      - id: go-staticcheck-mod
+      #
+      # Formatters
+      #
+      - id: go-fmt
+      #
+      # Style Checkers
+      #
+      - id: go-lint
+      # -   id: go-critic
+      #
+    # Invoking Custom Go Tools
+    # - Configured *entirely* through the `args` attribute, ie:
+    #   args: [ go, test, ./... ]
+    # - Use arg `--hook:error-on-output` to indicate that any output from the tool
+    #   should be treated as an error.
+    # - Use the `name` attribute to provide better messaging when the hook runs
+    # - Use the `alias` attribute to be able to invoke your hook via `pre-commit run`
+    #
+    # -   id: my-cmd
+    #     args: [ go, generate, ./... ]
+  - repo: local
+    hooks:
+      - id: test-library
+        name: Go Test for library module
+        entry: bash -c "cd ./backend-challenge/library && go test ./..."
+        language: system
+
+      - id: test-orderfoodonline
+        name: Go Test for orderfoodonline module
+        entry: bash -c "cd ./backend-challenge/services/orderfoodonline && go test ./..."
+        language: system
+        stages:
+          - pre-commit
+
+      - id: test-coupons
+        name: Go Test for coupons module
+        entry: bash -c "cd ./backend-challenge/services/coupons && go test ./..."
+        language: system
+        stages:
+          - pre-commit
+
+      - id: vet-library
+        name: Go Vet for library
+        entry: bash -c "cd ./backend-challenge/library && go vet ./..."
+        language: system
+
+      - id: vet-orderfoodonline
+        name: Go Vet for orderfoodonline
+        entry: bash -c "cd backend-challenge/services/orderfoodonline && go vet ./..."
+        language: system
+      
+      - id: gosec-library
+        name: GoSec - Scan library
+        entry: bash -c "cd backend-challenge/library && gosec ./..."
+        language: system
+        pass_filenames: false
+
+      - id: gosec-orderfoodonline
+        name: GoSec - Scan orderfoodonline
+        entry: bash -c "cd backend-challenge/services/orderfoodonline && gosec ./..."
+        language: system
+        pass_filenames: false
+
+      - id: service-precommit-coupons
+        name: Generate Coupons - Docs/Mocks, build and tests
+        entry: make precommit-coupons
+        language: system
+
+      - id: service-precommit-orderfoodonline
+        name: Generate orderfoodonline - API Docs/Mocks, build and tests
+        entry: make precommit-orderfoodonline
+        language: system
