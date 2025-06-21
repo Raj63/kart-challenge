@@ -1,3 +1,4 @@
+// Package routes provides HTTP routing configuration for the Order Food Online service.
 package routes
 
 import (
@@ -5,6 +6,8 @@ import (
 )
 
 // validateDependencies checks that all required dependencies are provided.
+// It validates that all necessary handlers and middleware are properly initialized
+// before setting up the routes to prevent runtime errors.
 func validateDependencies(d Dependencies) error {
 	if d.AuthMiddleware == nil {
 		return fmt.Errorf("authMiddleware cannot be nil")
@@ -19,6 +22,9 @@ func validateDependencies(d Dependencies) error {
 }
 
 // setupAPIRoutes sets up API routes using the provided dependencies.
+// It configures all REST API endpoints under the /api prefix with authentication
+// middleware applied to all routes. Routes include product listing, product details,
+// and order placement.
 func (r *Router) setupAPIRoutes(di Dependencies) error {
 	if err := validateDependencies(di); err != nil {
 		return err
@@ -32,7 +38,7 @@ func (r *Router) setupAPIRoutes(di Dependencies) error {
 	api.Use(di.AuthMiddleware.Authenticate())
 	{
 		api.GET("/product", di.ProductHandler.ListProducts)
-		api.GET("/product/{productId}", di.ProductHandler.GetProductByID)
+		api.GET("/product/:productId", di.ProductHandler.GetProductByID)
 		api.POST("/order", di.OrderHandler.PlaceOrder)
 	}
 

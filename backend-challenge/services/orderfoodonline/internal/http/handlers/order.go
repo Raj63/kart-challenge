@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"orderfoodonline/internal/repository/models"
 	"orderfoodonline/internal/service"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -28,7 +29,8 @@ func NewOrderHandler(service service.OrderService) OrderHandler {
 // @Failure 400 {object} map[string]string "error":"invalid request body"
 // @Failure 400 {object} map[string]string "error":"no items in order"
 // @Failure 422 {object} map[string]string "error":"invalid productId or quantity"
-// @Failure 422 {object} map[string]string "error":"product not found"
+// @Failure 404 {object} map[string]string "error":"product not found"
+// @Failure 422 {object} map[string]string "error":"invalid coupon code"
 // @Failure 500 {object} map[string]string "error":"failed to place order"
 // @Router /order [post]
 func (h *orderHandler) PlaceOrder(c *gin.Context) {
@@ -39,14 +41,19 @@ func (h *orderHandler) PlaceOrder(c *gin.Context) {
 	}
 	if len(req.Items) == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "no items in order"})
+		return
 	}
 	order, err := h.service.PlaceOrder(c.Request.Context(), &req)
 	if err != nil {
-		if err.Error() == "invalid productId or quantity" {
+		if err.Error() == service.InvalidProductOrQuantity {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 			return
 		}
-		if len(err.Error()) > 13 && err.Error()[:13] == "product not found" {
+		if strings.Contains(err.Error(), service.ProductNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			return
+		}
+		if err.Error() == service.InvalidPromoCode {
 			c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 			return
 		}

@@ -1,3 +1,5 @@
+// Package main implements the entry point for the Order Food Online REST API service.
+// This service provides endpoints for managing products, orders, and coupons.
 package main
 
 import (
@@ -13,7 +15,9 @@ import (
 	"orderfoodonline/internal/service"
 )
 
-// main is the entry point for the orderfoodonline service.
+// main is the entry point for the Order Food Online REST API service.
+// It initializes configuration, database connections, repositories, services,
+// and HTTP handlers before starting the server.
 // @title Order Food Online
 // @version 2.0
 // @description Documentation's Order Food Online
@@ -69,8 +73,21 @@ func main() {
 		log.Fatalf("failed to initialize product repository: %v", err)
 	}
 
+	// Run database migrations (seed products if new migration file exists)
+	migrationService := service.NewMigrationService(productRepository, appLogger)
+	if err := migrationService.RunMigrations(ctx, "./migrations"); err != nil {
+		appLogger.Error("failed to run migrations: %v", err)
+		log.Fatalf("failed to run migrations: %v", err)
+	}
+
 	orderRepository := repository.NewOrderRepository(repo)
-	orderService := service.NewOrderService(orderRepository, productRepository)
+	couponRepository, err := repository.NewCouponRepository(repo)
+	if err != nil {
+		appLogger.Error("failed to initialize coupon repository: %v", err)
+		log.Fatalf("failed to initialize coupon repository: %v", err)
+	}
+
+	orderService := service.NewOrderService(orderRepository, productRepository, couponRepository, appLogger)
 	orderHandler := handlers.NewOrderHandler(orderService)
 
 	productService := service.NewProductService(productRepository, appLogger)
@@ -79,7 +96,6 @@ func main() {
 	if err != nil {
 		appLogger.Error("failed to initialize swagger handler: %v", err)
 		log.Fatalf("failed to initialize swagger handler: %v", err)
-
 	}
 	productHandler := handlers.NewProductHandler(productService)
 

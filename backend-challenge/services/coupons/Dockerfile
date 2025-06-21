@@ -1,33 +1,36 @@
-# syntax=docker/dockerfile:1
-FROM golang:1.23-alpine AS builder
+FROM --platform=linux/amd64 golang:1.23-alpine AS builder
 
-WORKDIR /app
-
-# Install git for go mod
-RUN apk add --no-cache git
+WORKDIR /app/backend-challenge/services/coupons
 
 # Copy go mod and sum
-COPY go.mod go.sum ./
+COPY backend-challenge/services/coupons/go.mod .
+COPY backend-challenge/services/coupons/go.sum .
+
+# Copy shared library using full relative path
+COPY backend-challenge/library /app/backend-challenge/library
+
 RUN go mod download
 
 # Copy the rest of the code
-COPY . .
+COPY backend-challenge/services/coupons/. .
+
+# Download dependencies
+RUN go mod download
 
 # Build the processor binary
-RUN go build -o coupons-processor ./cmd/processor/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ./coupons-processor ./cmd/processor/main.go
 
 # Final runtime image
-FROM alpine:latest
-WORKDIR /app
+FROM --platform=linux/amd64 alpine:latest
 
 # Install ca-certificates for MongoDB TLS
 RUN apk add --no-cache ca-certificates
 
-COPY --from=builder /app/coupons-processor ./
-COPY config.json ./
-
-# Create data directory for mounting
-RUN mkdir -p /app/data/add /app/data/remove
+COPY --from=builder /app/backend-challenge/services/coupons/coupons-processor ./
+COPY --from=builder /app/backend-challenge/services/coupons/config.json ./
+# COPY --from=builder /app/backend-challenge/services/coupons/data /data
+RUN chmod +x /coupons-processor
+RUN mkdir -p /logs
 
 VOLUME ["/app/data"]
 

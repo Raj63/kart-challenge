@@ -31,7 +31,7 @@ func NewProductService(repo repository.ProductRepository, logger *logger.Logger)
 func (s *productService) ListProducts(ctx context.Context) ([]models.Product, error) {
 	products, err := s.repo.ListProducts(ctx)
 	if err != nil {
-		s.logger.Error("error listing products: %v", err)
+		s.logger.Error("%s: %v", ProductListingError, err)
 		return nil, errors.New(ProductListingError)
 	}
 	return products, nil

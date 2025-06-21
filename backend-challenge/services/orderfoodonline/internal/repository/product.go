@@ -11,13 +11,18 @@ import (
 
 // productRepository provides MongoDB-backed access to product data.
 type productRepository struct {
-	collection *mongo.Collection
+	collection           *mongo.Collection
+	migrationsCollection *mongo.Collection
 }
 
 // NewProductRepository creates a new ProductRepository using the given Repository.
 func NewProductRepository(repo *Repository) (ProductRepository, error) {
 	collection := repo.db.Collection("products")
-	return &productRepository{collection: collection}, nil
+	migrationsCollection := repo.db.Collection("migrations")
+	return &productRepository{
+		collection:           collection,
+		migrationsCollection: migrationsCollection,
+	}, nil
 }
 
 // ListProducts returns all products from the database.
@@ -52,4 +57,52 @@ func (r *productRepository) FindProductByID(ctx context.Context, id string) (*mo
 		return nil, err
 	}
 	return &p, nil
+}
+
+// BulkInsertProducts inserts multiple products into the database.
+func (r *productRepository) BulkInsertProducts(ctx context.Context, products []models.Product) error {
+	if len(products) == 0 {
+		return nil
+	}
+	var documents []interface{}
+	for _, product := range products {
+		documents = append(documents, product)
+	}
+	_, err := r.collection.InsertMany(ctx, documents)
+	return err
+}
+
+// GetAppliedMigrations returns all applied migrations from the database.
+func (r *productRepository) GetAppliedMigrations(ctx context.Context) ([]models.Migration, error) {
+	cur, err := r.migrationsCollection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cur.Close(ctx)
+	var migrations []models.Migration
+	for cur.Next(ctx) {
+		var migration models.Migration
+		if err := cur.Decode(&migration); err != nil {
+			return nil, err
+		}
+		migrations = append(migrations, migration)
+	}
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+	return migrations, nil
+}
+
+// InsertMigration inserts a new migration record into the database.
+func (r *productRepository) InsertMigration(ctx context.Context, migration *models.Migration) error {
+	_, err := r.migrationsCollection.InsertOne(ctx, migration)
+	return err
+}
+
+// UpdateMigration updates an existing migration record in the database.
+func (r *productRepository) UpdateMigration(ctx context.Context, migration *models.Migration) error {
+	filter := bson.M{"id": migration.ID}
+	update := bson.M{"$set": bson.M{"status": migration.Status}}
+	_, err := r.migrationsCollection.UpdateOne(ctx, filter, update)
+	return err
 }

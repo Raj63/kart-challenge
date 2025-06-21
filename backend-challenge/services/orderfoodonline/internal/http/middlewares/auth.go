@@ -20,13 +20,6 @@ func NewAuthMiddleware(logger *logger.Logger) AuthMiddleware {
 // Authentication middleware to protect routes
 func (a *auth) Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Authorization header required"})
-			c.Abort()
-			return
-		}
-
 		apiKey := c.GetHeader("api_key")
 		if apiKey == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "API key required"})

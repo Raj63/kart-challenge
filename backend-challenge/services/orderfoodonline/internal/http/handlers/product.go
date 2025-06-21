@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"orderfoodonline/internal/service"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -45,7 +46,7 @@ func (h *productHandler) ListProducts(c *gin.Context) {
 // @Failure 500 {object} map[string]string "error":"failed to fetch product"
 // @Router /api/product/{productId} [get]
 func (h *productHandler) GetProductByID(c *gin.Context) {
-	id := c.Param("productId")
+	id := strings.TrimSpace(c.Param("productId"))
 	if id == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "productId is required"})
 		return

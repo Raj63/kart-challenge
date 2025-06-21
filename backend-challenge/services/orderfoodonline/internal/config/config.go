@@ -1,3 +1,4 @@
+// Package config provides configuration management for the Order Food Online service.
 package config
 
 import (
@@ -7,41 +8,44 @@ import (
 	"time"
 )
 
-// Config holds the application configuration.
+// Config holds the complete application configuration including environment,
+// server settings, database connection, logging, and Swagger documentation.
 type Config struct {
-	Env      string            `json:"env"`
-	Swagger  *SwaggerConfig    `json:"swagger"`
-	Server   *ServerConfig     `json:"server"`
-	Logger   *logger.LogConfig `json:"logger"`
-	Database *DbConfig         `json:"database"`
+	Env      string            `json:"env"`      // Environment name (e.g., "development", "production")
+	Swagger  *SwaggerConfig    `json:"swagger"`  // Swagger documentation configuration
+	Server   *ServerConfig     `json:"server"`   // HTTP server configuration
+	Logger   *logger.LogConfig `json:"logger"`   // Logging configuration
+	Database *DbConfig         `json:"database"` // Database connection configuration
 }
 
-// SwaggerConfig holds configuration for Swagger documentation.
+// SwaggerConfig holds configuration for Swagger documentation generation and serving.
 type SwaggerConfig struct {
-	FilePath string `json:"file_path"`
+	FilePath string `json:"file_path"` // Path to the Swagger JSON file
 }
 
-// ServerConfig holds server-related configuration.
+// ServerConfig holds HTTP server-related configuration including timeouts and connection limits.
 type ServerConfig struct {
-	Host           string        `json:"host"`
-	Port           int           `json:"port"`
-	ReadTimeout    time.Duration `json:"read_timeout"`
-	WriteTimeout   time.Duration `json:"write_timeout"`
-	IdleTimeout    time.Duration `json:"idle_timeout"`
-	MaxConnections int           `json:"max_connections"`
+	Host           string        `json:"host"`            // Server host address
+	Port           int           `json:"port"`            // Server port number
+	ReadTimeout    time.Duration `json:"read_timeout"`    // Request read timeout
+	WriteTimeout   time.Duration `json:"write_timeout"`   // Response write timeout
+	IdleTimeout    time.Duration `json:"idle_timeout"`    // Connection idle timeout
+	MaxConnections int           `json:"max_connections"` // Maximum number of concurrent connections
 }
 
-// DbConfig holds database related configuration.
+// DbConfig holds database connection configuration including credentials and connection details.
 type DbConfig struct {
-	Host         string `json:"host"`
-	Port         int    `json:"port"`
-	User         string `json:"user"`
-	Password     string `json:"password"`
-	DatabaseName string `json:"dbname"`
-	Type         string `json:"type"`
+	Host         string `json:"host"`     // Database host address
+	Port         int    `json:"port"`     // Database port number
+	User         string `json:"user"`     // Database username
+	Password     string `json:"password"` // Database password
+	DatabaseName string `json:"dbname"`   // Database name
+	Type         string `json:"type"`     // Database type (e.g., "mongodb", "postgres")
 }
 
-// NewConfig creates a new Config from a config manager.
+// NewConfig creates a new Config instance from a configuration manager.
+// It populates all configuration fields from the provided config manager
+// and sets version information from constants.
 func NewConfig(configManager *config.Manager) (*Config, error) {
 	cfg := Config{
 		Env: configManager.GetString("env"),

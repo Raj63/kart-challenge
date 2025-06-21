@@ -1,3 +1,4 @@
+// Package routes provides HTTP routing configuration for the Order Food Online service.
 package routes
 
 import (
@@ -21,14 +22,17 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-// Router handles HTTP routing for the product service
+// Router handles HTTP routing for the Order Food Online service.
+// It manages the Gin engine, middleware setup, route configuration,
+// and server lifecycle including graceful shutdown.
 type Router struct {
-	engine *gin.Engine
-	config *config.Config
-	logger *logger.Logger
+	engine *gin.Engine    // Gin HTTP engine instance
+	config *config.Config // Application configuration
+	logger *logger.Logger // Application logger
 }
 
-// NewRouter creates a new Gin engine
+// NewRouter creates a new Router instance with the provided configuration and logger.
+// It initializes a Gin engine in default mode and returns a configured router.
 func NewRouter(config *config.Config, logger *logger.Logger) *Router {
 	// Set up Gin router
 	// Use gin.ReleaseMode for production
@@ -45,6 +49,8 @@ func NewRouter(config *config.Config, logger *logger.Logger) *Router {
 }
 
 // Run starts the HTTP server and handles graceful shutdown.
+// It creates an HTTP server with the configured settings, starts it in a goroutine,
+// and waits for interrupt signals to gracefully shut down the server.
 func (r *Router) Run() {
 	serverConfig := r.config.Server
 
@@ -83,12 +89,16 @@ func (r *Router) Run() {
 
 }
 
-// GetEngine returns the Gin engine
+// GetEngine returns the underlying Gin engine instance.
+// This method provides access to the Gin engine for advanced configuration
+// or testing purposes.
 func (r *Router) GetEngine() *gin.Engine {
 	return r.engine
 }
 
-// Init initializes the router with dependencies.
+// Init initializes the router with dependencies and sets up all middleware and routes.
+// It configures middleware stack, API routes, health checks, and Swagger documentation
+// based on the environment configuration.
 func (r *Router) Init(dep Dependencies) error {
 	// setup middlewares first
 	r.setupMiddleware(dep)
@@ -102,6 +112,8 @@ func (r *Router) Init(dep Dependencies) error {
 }
 
 // setupMiddleware sets up all required middlewares for the router.
+// It configures rate limiting, CORS, authentication, and health check endpoints.
+// Swagger documentation is only enabled in local development environment.
 func (r *Router) setupMiddleware(dep Dependencies) {
 	// RateLimiter middleware
 	r.engine.Use(middlewares.RateLimiterHandler())

@@ -20,19 +20,14 @@ import (
 type Manager struct {
 	configPath string
 	config     map[string]interface{}
-	watchers   []Watcher
 	mu         sync.RWMutex
 }
-
-// Watcher is called when configuration changes
-type Watcher func(key string, oldValue, newValue interface{})
 
 // NewConfigManager creates a new configuration manager
 func NewConfigManager(configPath string) *Manager {
 	return &Manager{
 		configPath: configPath,
 		config:     make(map[string]interface{}),
-		watchers:   make([]Watcher, 0),
 	}
 }
 
@@ -166,9 +161,8 @@ func (cm *Manager) generateDefaultConfig() map[string]interface{} {
 			"include_caller":    false,
 			"use_colors":        true,
 			"timestamp_format":  "2006-01-02 15:04:05.000",
-			"log_format":        "[{timestamp}] [{level}] {message}",
+			"log_format":        "[{timestamp}] [{level}] [{version}-{commit}] {message}",
 			"buffer_size":       1024,
-			"async_logging":     false,
 			"flush_interval":    "5s",
 		},
 		"server": map[string]interface{}{
@@ -261,28 +255,6 @@ func (cm *Manager) GetInt(key string) int {
 	return 0
 }
 
-// GetInt64 retrieves an int64 configuration value
-func (cm *Manager) GetInt64(key string) int64 {
-	value := cm.Get(key)
-	if value == nil {
-		return 0
-	}
-
-	switch v := value.(type) {
-	case int64:
-		return v
-	case int:
-		return int64(v)
-	case float64:
-		return int64(v)
-	case string:
-		if i, err := strconv.ParseInt(v, 10, 64); err == nil {
-			return i
-		}
-	}
-	return 0
-}
-
 // GetBool retrieves a boolean configuration value
 func (cm *Manager) GetBool(key string) bool {
 	value := cm.Get(key)
@@ -317,64 +289,6 @@ func (cm *Manager) GetDuration(key string) time.Duration {
 	return duration
 }
 
-// GetStringSlice retrieves a string slice configuration value
-func (cm *Manager) GetStringSlice(key string) []string {
-	value := cm.Get(key)
-	if value == nil {
-		return nil
-	}
-
-	switch v := value.(type) {
-	case []string:
-		return v
-	case []interface{}:
-		result := make([]string, len(v))
-		for i, item := range v {
-			result[i] = fmt.Sprintf("%v", item)
-		}
-		return result
-	}
-	return nil
-}
-
-// Set sets a configuration value
-func (cm *Manager) Set(key string, value interface{}) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-
-	oldValue := cm.Get(key)
-	keys := strings.Split(key, ".")
-	cm.setNestedValue(cm.config, keys, value)
-
-	// Notify watchers
-	for _, watcher := range cm.watchers {
-		watcher(key, oldValue, value)
-	}
-}
-
-// Save saves the current configuration to file
-func (cm *Manager) Save() error {
-	cm.mu.RLock()
-	defer cm.mu.RUnlock()
-
-	ext := strings.ToLower(filepath.Ext(cm.configPath))
-	switch ext {
-	case ".json":
-		return cm.writeJSONConfig(cm.config)
-	case ".yaml", ".yml":
-		return cm.writeYAMLConfig(cm.config)
-	default:
-		return fmt.Errorf("unsupported config file format: %s", ext)
-	}
-}
-
-// AddWatcher adds a configuration change watcher
-func (cm *Manager) AddWatcher(watcher Watcher) {
-	cm.mu.Lock()
-	defer cm.mu.Unlock()
-	cm.watchers = append(cm.watchers, watcher)
-}
-
 // getNestedValue retrieves a nested value from a map
 func (cm *Manager) getNestedValue(data map[string]interface{}, keys []string) interface{} {
 	if len(keys) == 0 {
@@ -398,28 +312,6 @@ func (cm *Manager) getNestedValue(data map[string]interface{}, keys []string) in
 	return nil
 }
 
-// setNestedValue sets a nested value in a map
-func (cm *Manager) setNestedValue(data map[string]interface{}, keys []string, value interface{}) {
-	if len(keys) == 0 {
-		return
-	}
-
-	key := keys[0]
-	if len(keys) == 1 {
-		data[key] = value
-		return
-	}
-
-	// Create nested map if it doesn't exist
-	if _, exists := data[key]; !exists {
-		data[key] = make(map[string]interface{})
-	}
-
-	if nested, ok := data[key].(map[string]interface{}); ok {
-		cm.setNestedValue(nested, keys[1:], value)
-	}
-}
-
 // GetLogConfig returns a logger configuration
 func (cm *Manager) GetLogConfig() *logger.LogConfig {
 	return &logger.LogConfig{
@@ -436,7 +328,6 @@ func (cm *Manager) GetLogConfig() *logger.LogConfig {
 		TimestampFormat:  cm.GetString("logging.timestamp_format"),
 		LogFormat:        cm.GetString("logging.log_format"),
 		BufferSize:       cm.GetInt("logging.buffer_size"),
-		AsyncLogging:     cm.GetBool("logging.async_logging"),
 		FlushInterval:    cm.GetDuration("logging.flush_interval"),
 	}
 }

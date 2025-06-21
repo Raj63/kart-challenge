@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -106,7 +107,6 @@ type LogConfig struct {
 
 	// Performance configuration
 	BufferSize    int           `json:"buffer_size"`
-	AsyncLogging  bool          `json:"async_logging"`
 	FlushInterval time.Duration `json:"flush_interval"`
 }
 
@@ -125,9 +125,8 @@ func DefaultLogConfig() *LogConfig {
 		IncludeCaller:    false,
 		UseColors:        true,
 		TimestampFormat:  "2006-01-02 15:04:05.000",
-		LogFormat:        "[{timestamp}] [{level}] {message}",
+		LogFormat:        "[{timestamp}] [{level}] [{version}-{commit}] {message}",
 		BufferSize:       1024,
-		AsyncLogging:     false,
 		FlushInterval:    5 * time.Second,
 	}
 }
@@ -140,7 +139,6 @@ type Logger struct {
 	mu          sync.Mutex
 	buffer      chan logEntry
 	stopChan    chan struct{}
-	wg          sync.WaitGroup
 }
 
 // logEntry represents a log entry
@@ -168,13 +166,6 @@ func NewLogger(config *LogConfig) (*Logger, error) {
 		if err := logger.initFileWriter(); err != nil {
 			return nil, fmt.Errorf("failed to initialize file writer: %w", err)
 		}
-	}
-
-	// Initialize async logging
-	if config.AsyncLogging {
-		logger.buffer = make(chan logEntry, config.BufferSize)
-		logger.wg.Add(1)
-		go logger.asyncWriter()
 	}
 
 	return logger, nil
@@ -213,33 +204,6 @@ func (l *Logger) initFileWriter() error {
 	return nil
 }
 
-// asyncWriter handles async log writing
-func (l *Logger) asyncWriter() {
-	defer l.wg.Done()
-	ticker := time.NewTicker(l.config.FlushInterval)
-	defer ticker.Stop()
-
-	for {
-		select {
-		case entry := <-l.buffer:
-			l.writeLogEntry(entry)
-		case <-ticker.C:
-			l.flush()
-		case <-l.stopChan:
-			// Flush remaining entries
-			for {
-				select {
-				case entry := <-l.buffer:
-					l.writeLogEntry(entry)
-				default:
-					l.flush()
-					return
-				}
-			}
-		}
-	}
-}
-
 // writeLogEntry writes a log entry to all configured outputs
 func (l *Logger) writeLogEntry(entry logEntry) {
 	if entry.level < l.config.Level {
@@ -269,6 +233,14 @@ func (l *Logger) writeLogEntry(entry logEntry) {
 // formatMessage formats the log message according to the configuration
 func (l *Logger) formatMessage(entry logEntry) string {
 	message := l.config.LogFormat
+
+	// if version is not specified then set to default
+	if l.config.Version == "" {
+		l.config.Version = "0.1.0"
+	}
+
+	message = replacePlaceholder(message, "{version}", l.config.Version)
+	message = replacePlaceholder(message, "{commit}", l.config.Commit)
 
 	if l.config.IncludeTimestamp {
 		timestamp := entry.time.Format(l.config.TimestampFormat)
@@ -337,23 +309,23 @@ func (l *Logger) log(level LogLevel, format string, args ...interface{}) {
 		caller:  getCaller(),
 	}
 
-	if l.config.AsyncLogging {
-		select {
-		case l.buffer <- entry:
-		default:
-			// Buffer is full, write synchronously
-			l.writeLogEntry(entry)
-		}
-	} else {
-		l.writeLogEntry(entry)
-	}
+	l.writeLogEntry(entry)
 }
 
-// getCaller returns the caller information
+// getCaller returns the file, line, and function name of the caller.
 func getCaller() string {
-	// This is a simplified implementation
-	// In a real implementation, you would use runtime.Caller to get the actual caller
-	return "unknown"
+	// Skip 2 levels: getCaller → the logger function → actual caller
+	pc, file, line, ok := runtime.Caller(2)
+	if !ok {
+		return "unknown"
+	}
+
+	funcName := "unknown"
+	if fn := runtime.FuncForPC(pc); fn != nil {
+		funcName = fn.Name()
+	}
+
+	return fmt.Sprintf("%s:%d [%s]", filepath.Base(file), line, filepath.Base(funcName))
 }
 
 // flush flushes any buffered data
@@ -369,11 +341,6 @@ func (l *Logger) flush() {
 
 // Close closes the logger and flushes any remaining data
 func (l *Logger) Close() error {
-	if l.config.AsyncLogging {
-		close(l.stopChan)
-		l.wg.Wait()
-	}
-
 	l.flush()
 
 	if l.fileWriter != nil {
@@ -405,22 +372,4 @@ func (l *Logger) IsLevelEnabled(level LogLevel) bool {
 // GetFileWriter returns the current file writer (for advanced operations)
 func (l *Logger) GetFileWriter() io.WriteCloser {
 	return l.fileWriter
-}
-
-// ReopenFile reopens the log file (useful for log rotation by external tools)
-func (l *Logger) ReopenFile() error {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-
-	if l.fileWriter != nil {
-		// Close current file writer
-		if err := l.fileWriter.Close(); err != nil {
-			return err
-		}
-
-		// Reinitialize file writer
-		return l.initFileWriter()
-	}
-
-	return nil
 }

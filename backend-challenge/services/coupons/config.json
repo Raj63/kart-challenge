@@ -12,7 +12,7 @@
         "dbname": "foodonline"
     },
     "processor": {
-        "data_directory": "data",
+        "data_directory": "/app/data",
         "batch_size": 1000
     }
 }
