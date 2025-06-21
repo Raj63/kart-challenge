@@ -16,6 +16,9 @@ import (
 	"orderfoodonline/internal/config"
 	"orderfoodonline/internal/constants"
 	"orderfoodonline/internal/http/middlewares"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // Router handles HTTP routing for the product service
@@ -128,7 +131,7 @@ func (r *Router) setupMiddleware(dep Dependencies) {
 		r.engine.GET("/api/swagger.json", dep.SwaggerHandler.GetSwaggerJSONHandler)
 
 		// Serve Swagger UI (pointing to filtered doc.json)
-		r.engine.GET("/swagger/*any", dep.SwaggerHandler.GetSwaggerUIHandler)
+		r.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/api/swagger.json")))
 	} else {
 		log.Println("Swagger is disabled in dev/production")
 	}

@@ -1,86 +1,181 @@
-# Shopping Cart
+# Kart Challenge – Food Ordering Platform
 
-Build a mini food ordering web app featuring product listing and a functional shopping cart.\
-Prioritize correctness in functionality while getting it to look as close to the design as possible.
+A robust, modular food ordering backend and supporting library, designed for extensibility and correctness. This project features a RESTful API for product listing, cart management, and order processing, as well as a shared Go library for logging, configuration, and integrations.
 
-For this task you will need to integrate to our demo e-commerce API for listing products and placing orders.
+---
 
-**API Reference**
+## Project Structure
 
-You can find our [API Documentation](https://orderfoodonline.deno.dev/public/openapi.html) here.
+```bash
+kart-challenge/
+├── backend-challenge/
+│   ├── library/                # Shared Go library (logger, config, slack, etc.)
+│   ├── services/
+│   │   ├── coupons/            # Coupons microservice (skeleton)
+│   │   │   └── cmd/processor/  # Coupons processor entrypoint
+│   │   └── orderfoodonline/    # Main food ordering service
+│   │       ├── cmd/rest/       # REST API entrypoint and docs
+│   │       ├── internal/       # Service internals (handlers, middlewares, routes, etc.)
+│   │       └── Dockerfile      # Multi-stage build for the service
+│   └── Makefile                # Root Makefile for orchestration
+├── api/
+│   └── openapi.yaml            # OpenAPI spec for the API
+├── docker-compose.local.yml    # Local dev orchestration
+├── .pre-commit-config.yaml     # Pre-commit hooks for Go quality and CI
+├── shell.nix                   # Nix shell for reproducible dev env
+└── README.md                   # This file
+```
 
-API documentation is based on [OpenAPI3.1](https://swagger.io/specification/v3/) specification.
-You can also find spec file [here](https://orderfoodonline.deno.dev/public/openapi.yaml).
- 
-**Functional Requirements**
+---
 
-- Display products with images
-- Add items to the cart and remove items
-- Show order total correctly
-- Increase or decrease item count in the cart
-- Show order confirmation after placing the order
-- Interactive hover and focus states for elements
+## Features
 
-**Bonus Goals**
+- **Product Listing & Cart API**: RESTful endpoints for products, cart, and order management.
+- **Shared Go Library**: Centralized logging, configuration, and Slack integration.
+- **Pre-commit Quality Gates**: Lint, format, staticcheck, security scan, and tests.
+- **API Documentation**: Swagger/OpenAPI 3.1 docs, auto-generated with `swag`.
+- **Dockerized**: Multi-stage Dockerfiles for efficient builds and minimal runtime images.
+- **Extensible Microservices**: Coupons service skeleton for future discount/offer logic.
+- **Makefile Automation**: Common tasks for build, test, docs, and pre-commit.
 
-- Allow users to enter a discount code (above the "Confirm Order" button)
-- Discount code `HAPPYHOURS` applies 18% discount to the order total
-- Discount code `BUYGETONE` gives the lowest priced item for free
-- Responsive design based on device's screen size
+---
 
-**Are You a Full Stack Developer??**
+## Development Setup
 
-Impress us by implementing your own version of the API based on the OpenAPI specification.\
-Choose any language or framework of your choice. For example our top pick for backend is [Go](https://go.dev)
+### Prerequisites
 
-> The API immplementation example available to you at orderfoodonline.deno.dev/api is simplified and doesn't handle some edge cases intentionally.
-> Use your best judgement to build a Robust API server.
+- [Go 1.23+](https://go.dev/)
+- [Docker](https://www.docker.com/)
+- [Make](https://www.gnu.org/software/make/)
+- [Nix (optional)](https://nixos.org/) for reproducible environments
+- [pre-commit](https://pre-commit.com/) (install via pip or your package manager)
 
-## Design
+### Clone and Prepare
 
-You can find a [Figma](https://figma.com) design file `design.fig` that you can use.
-You might have to use your best judgement for some mobile layout designs and spacing.
+```sh
+git clone <your-repo-url>
+cd kart-challenge
+pre-commit install
+```
 
-### Style Guide
+### Local Development
 
-The designs were created to the following widths:
+- **Start all services (with MongoDB):**
+  
+  ```sh
+  make start
+  ```
 
-- Mobile: 375px
-- Desktop: 1440px
+- **Stop all services:**
+  
+  ```sh
+  make stop
+  ```
 
-> 💡 These are just the design sizes. Ensure content is responsive and meets WCAG requirements by testing the full range of screen sizes from 320px to large screens.
+- **Run all pre-commit checks:**
+  
+  ```sh
+  pre-commit run --all-files
+  ```
 
-**Typography**
+---
 
-- Font size (product names): 16px
+## Makefile Targets
 
-### Font
+From the root `Makefile`:
 
-- Family: [Red Hat Text](https://fonts.google.com/specimen/Red+Hat+Text)
-- Weights: 400, 600, 700
+- `start` – Start all services with Docker Compose
+- `stop` – Stop all services
+- `precommit-orderfoodonline` – Generate docs/mocks, build, and test orderfoodonline
+- `precommit-coupons` – (Reserved for coupons service)
 
-## Getting Started
+From the service `Makefile` (e.g., `backend-challenge/services/orderfoodonline/Makefile`):
 
-Feel free to use any tool or workflow ou are comformtable with.\
-Here is an example workflow (you can use it as a reference or use your own workflow)
+- `dep` – Run `go mod tidy`
+- `build` – Build Docker image
+- `test` – Run all Go tests with coverage
+- `generate-mocks` – Generate GoMock mocks
+- `generate-docs` – Generate Swagger docs
+- `precommit` – Run all of the above for CI
 
-1. Create a new public repository on [GitHub](https://github.com) (alternatively you can use GitLab, BitBucket or Git server of your choice).
-   If you are creating your repository on GitHub, you can chose to use this repository as a starting template. (Click on Use template button at the top)
-2. Look through the deisngs to plan your project. This will help you design UI libraries or tools.
-3. Create a [Vite](https://vite.dev) app to bootstrap a modern front-end project (alternatively use the framework of your choice).
-4. Structure your HTML and preview before theming and adding interactive functionality.
-5. Test and Iterate to build more features
-6. Deploy your app anywhere securely. You may use AWS, Vercel, Deno Deploy, Surge, CloudFlare Pages or some other web app deployment services.
-7. Additionally configure your repository to automatically publish your app on new commit push (CI).
+---
 
-> 💡 Replace or Modify this README to explain your solution and how to run and test it.
+## Pre-commit Hooks
 
-_By following these guidelines, you should be able to build a functional and visually appealing mini e-commerce shopping portal that meets the minimum requirements and bonus goals. Good luck! 🚀_
+Configured in `.pre-commit-config.yaml`:
 
-**Resources**
+- **Go Build/Format/Lint/Staticcheck**
+- **Go Test** (library, orderfoodonline, coupons)
+- **Go Vet** (library, orderfoodonline)
+- **GoSec** (security scan)
+- **Gitlint** (commit message style)
+- **Docs/Mocks Generation** (via Makefile)
 
-- API documentation: https://orderfoodonline.deno.dev/public/openapi.html
-- API specification: https://orderfoodonline.deno.dev/public/openapi.yaml
-- Figma design file: [design.fig](./design.fig)
-- Red Hat Text font: https://fonts.google.com/specimen/Red+Hat+Text
+---
+
+## How to Run
+
+### With Docker Compose
+
+```sh
+make start
+# or directly:
+docker compose -f docker-compose.local.yml up --build
+```
+
+- API will be available at [http://localhost:8080](http://localhost:8080)
+- MongoDB at [mongodb://localhost:27017](mongodb://localhost:27017)
+
+### Run Tests
+
+```sh
+make -C backend-challenge/services/orderfoodonline test
+make -C backend-challenge/library test
+make -C backend-challenge/services/coupons test
+```
+
+### Generate API Docs
+
+```sh
+make -C backend-challenge/services/orderfoodonline generate-docs
+```
+
+---
+
+## API Documentation
+
+- **OpenAPI Spec:** [`api/openapi.yaml`](api/openapi.yaml)
+- **Swagger UI:** [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html) (when running locally)
+- **Auto-generated docs:** `backend-challenge/services/orderfoodonline/cmd/rest/docs/`
+
+---
+
+## Extending the Project
+
+- Add new microservices under `backend-challenge/services/`
+- Add shared utilities to `backend-challenge/library/`
+- Update pre-commit hooks and Makefiles as needed
+
+## TODOs
+
+- **Hot Reload**: Local development with live reload using `air`.
+  
+---
+
+## Resources
+
+- [API documentation (live)](https://orderfoodonline.deno.dev/public/openapi.html)
+- [API specification (yaml)](https://orderfoodonline.deno.dev/public/openapi.yaml)
+- [Figma design file](./design.fig)
+- [Red Hat Text font](https://fonts.google.com/specimen/Red+Hat+Text)
+
+---
+
+## License
+
+MIT or as specified in this repository.
+
+---
+
+If you have any questions or want to contribute, please open an issue or pull request!
 

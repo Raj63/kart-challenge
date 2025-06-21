@@ -52,18 +52,6 @@ func (mr *MockSwaggerHandlerMockRecorder) GetSwaggerJSONHandler(arg0 any) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSwaggerJSONHandler", reflect.TypeOf((*MockSwaggerHandler)(nil).GetSwaggerJSONHandler), arg0)
 }
 
-// GetSwaggerUIHandler mocks base method.
-func (m *MockSwaggerHandler) GetSwaggerUIHandler(arg0 *gin.Context) {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "GetSwaggerUIHandler", arg0)
-}
-
-// GetSwaggerUIHandler indicates an expected call of GetSwaggerUIHandler.
-func (mr *MockSwaggerHandlerMockRecorder) GetSwaggerUIHandler(arg0 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetSwaggerUIHandler", reflect.TypeOf((*MockSwaggerHandler)(nil).GetSwaggerUIHandler), arg0)
-}
-
 // MockProductHandler is a mock of ProductHandler interface.
 type MockProductHandler struct {
 	ctrl     *gomock.Controller
@@ -110,4 +98,40 @@ func (m *MockProductHandler) ListProducts(c *gin.Context) {
 func (mr *MockProductHandlerMockRecorder) ListProducts(c any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProducts", reflect.TypeOf((*MockProductHandler)(nil).ListProducts), c)
+}
+
+// MockOrderHandler is a mock of OrderHandler interface.
+type MockOrderHandler struct {
+	ctrl     *gomock.Controller
+	recorder *MockOrderHandlerMockRecorder
+	isgomock struct{}
+}
+
+// MockOrderHandlerMockRecorder is the mock recorder for MockOrderHandler.
+type MockOrderHandlerMockRecorder struct {
+	mock *MockOrderHandler
+}
+
+// NewMockOrderHandler creates a new mock instance.
+func NewMockOrderHandler(ctrl *gomock.Controller) *MockOrderHandler {
+	mock := &MockOrderHandler{ctrl: ctrl}
+	mock.recorder = &MockOrderHandlerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockOrderHandler) EXPECT() *MockOrderHandlerMockRecorder {
+	return m.recorder
+}
+
+// PlaceOrder mocks base method.
+func (m *MockOrderHandler) PlaceOrder(c *gin.Context) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "PlaceOrder", c)
+}
+
+// PlaceOrder indicates an expected call of PlaceOrder.
+func (mr *MockOrderHandlerMockRecorder) PlaceOrder(c any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PlaceOrder", reflect.TypeOf((*MockOrderHandler)(nil).PlaceOrder), c)
 }

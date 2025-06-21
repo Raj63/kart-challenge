@@ -27,6 +27,22 @@ func (a *auth) Authenticate() gin.HandlerFunc {
 			return
 		}
 
+		apiKey := c.GetHeader("api_key")
+		if apiKey == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "API key required"})
+			c.Abort()
+			return
+		}
+
+		// Example validation (replace with your actual logic)
+		const validAPIKey = "apitest"
+
+		if apiKey != validAPIKey {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid API key"})
+			c.Abort()
+			return
+		}
+
 		c.Next()
 	}
 }

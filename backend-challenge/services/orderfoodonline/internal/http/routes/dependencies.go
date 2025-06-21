@@ -10,4 +10,5 @@ type Dependencies struct {
 	SwaggerHandler handlers.SwaggerHandler
 	AuthMiddleware middlewares.AuthMiddleware
 	ProductHandler handlers.ProductHandler
+	OrderHandler   handlers.OrderHandler
 }

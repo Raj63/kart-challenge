@@ -31,6 +31,9 @@ func (r *Router) setupAPIRoutes(di Dependencies) error {
 	// Protect all /api routes with auth middleware
 	api.Use(di.AuthMiddleware.Authenticate())
 	{
+		api.GET("/product", di.ProductHandler.ListProducts)
+		api.GET("/product/{productId}", di.ProductHandler.GetProductByID)
+		api.POST("/order", di.OrderHandler.PlaceOrder)
 	}
 
 	return nil

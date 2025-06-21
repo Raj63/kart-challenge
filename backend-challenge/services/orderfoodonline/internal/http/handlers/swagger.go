@@ -8,8 +8,6 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // swaggerHandler implements the SwaggerHandler interface for serving Swagger docs.
@@ -35,15 +33,6 @@ func (s *swaggerHandler) GetSwaggerJSONHandler(c *gin.Context) {
 	if len(s.jsonData) > 0 {
 		c.Data(200, "application/json", s.jsonData)
 		return
-	}
-
-	c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to serve Swagger Json"})
-}
-
-// GetSwaggerUIHandler serves the Swagger UI documentation.
-func (s *swaggerHandler) GetSwaggerUIHandler(c *gin.Context) {
-	if len(s.jsonData) > 0 {
-		ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/api/swagger.json"))
 	}
 
 	c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to serve Swagger Json"})

@@ -82,6 +82,10 @@ const (
 
 // LogConfig holds the logging configuration
 type LogConfig struct {
+	// App specifics Version & commit-hash
+	Version string `json:"-"`
+	Commit  string `json:"-"`
+
 	// Output configuration
 	OutputToFile   bool   `json:"output_to_file"`
 	OutputToStdio  bool   `json:"output_to_stdio"`

@@ -3,15 +3,17 @@ package config
 import (
 	"library/config"
 	"library/logger"
+	"orderfoodonline/internal/constants"
 	"time"
 )
 
 // Config holds the application configuration.
 type Config struct {
-	Env     string            `json:"env"`
-	Swagger *SwaggerConfig    `json:"swagger"`
-	Server  *ServerConfig     `json:"server"`
-	Logger  *logger.LogConfig `json:"logger"`
+	Env      string            `json:"env"`
+	Swagger  *SwaggerConfig    `json:"swagger"`
+	Server   *ServerConfig     `json:"server"`
+	Logger   *logger.LogConfig `json:"logger"`
+	Database *DbConfig         `json:"database"`
 }
 
 // SwaggerConfig holds configuration for Swagger documentation.
@@ -27,6 +29,16 @@ type ServerConfig struct {
 	WriteTimeout   time.Duration `json:"write_timeout"`
 	IdleTimeout    time.Duration `json:"idle_timeout"`
 	MaxConnections int           `json:"max_connections"`
+}
+
+// DbConfig holds database related configuration.
+type DbConfig struct {
+	Host         string `json:"host"`
+	Port         int    `json:"port"`
+	User         string `json:"user"`
+	Password     string `json:"password"`
+	DatabaseName string `json:"dbname"`
+	Type         string `json:"type"`
 }
 
 // NewConfig creates a new Config from a config manager.
@@ -45,6 +57,16 @@ func NewConfig(configManager *config.Manager) (*Config, error) {
 			MaxConnections: configManager.GetInt("server.max_connections"),
 		},
 		Logger: configManager.GetLogConfig(),
+		Database: &DbConfig{
+			Host:         configManager.GetString("database.host"),
+			Port:         configManager.GetInt("database.port"),
+			User:         configManager.GetString("database.user"),
+			Password:     configManager.GetString("database.password"),
+			DatabaseName: configManager.GetString("database.dbname"),
+			Type:         configManager.GetString("database.type"),
+		},
 	}
+	cfg.Logger.Version = constants.Version
+	cfg.Logger.Commit = constants.CommitHash
 	return &cfg, nil
 }
