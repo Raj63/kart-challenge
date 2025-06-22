@@ -12,9 +12,4 @@ jobs:
     with:
       check-build-status: true
       build-path: ./cmd/processor
-      filters: |
-        changed:
-          - .github/workflows/svc-coupons-ci.yml
-          - backend-challenge/library/**
-          - backend-challenge/services/coupons/**
       target: backend-challenge/services/coupons

@@ -12,9 +12,4 @@ jobs:
     with:
       check-build-status: true
       build-path: ./cmd/rest
-      filters: |
-        changed:
-          - .github/workflows/svc-orderfoodonline-ci.yml
-          - backend-challenge/library/**
-          - backend-challenge/services/orderfoodonline/**
       target: backend-challenge/services/orderfoodonline
