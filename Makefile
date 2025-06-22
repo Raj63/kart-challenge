@@ -111,5 +111,9 @@ precommit-orderfoodonline:
 	@echo "Run Generate mocks, docs and run build/tests"
 	cd backend-challenge/services/orderfoodonline && make precommit
 
+orderfoodonline-local-ci:
+	act -P ubuntu-latest=catthehacker/ubuntu:act-latest -W .github/workflows/svc-orderfoodonline-ci.yml --container-architecture linux/amd64
+
+
 kill:
 	sudo lsof -t -i -P -n | xargs sudo kill -9

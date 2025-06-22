@@ -1,0 +1,23 @@
+name: Extract Metadata
+
+description: Extract metadata from Git and Github context.
+
+outputs:
+  branch:
+    description: The current branch name without 'refs/heads/'.
+    value: ${{ steps.metadata.outputs.branch }}
+  commit_message:
+    description: The latest commit message of the current branch.
+    value: ${{ steps.metadata.outputs.commit_message }}
+
+runs:
+  using: composite
+
+  steps:
+    - id: metadata
+      shell: bash
+      run: |
+        echo "BRANCH_NAME=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
+        git fetch origin ${{ env.BRANCH_NAME }} --depth=1
+        echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
+        echo "commit_message=$(git show -s --format='%B' HEAD | head -n 1)" >> $GITHUB_OUTPUT

@@ -6,6 +6,19 @@ A robust, modular food ordering backend and supporting library, designed for ext
 
 ## 🚀 Latest Features & Improvements
 
+### **Enhanced Unit Testing & Mocking**
+- **Generated Mocks**: Automated mock generation using GoMock for all interfaces
+- **Interface-Based Testing**: Clean separation of concerns with interface-based repository design
+- **Comprehensive Test Coverage**: Unit tests for all services with proper mocking patterns
+- **Human-Readable Tests**: Well-structured test cases with clear Given/When/Then patterns
+- **Mock Validation**: Proper expectation verification and error scenario testing
+
+### **Improved Repository Architecture**
+- **Interface-Driven Design**: MongoDB collections abstracted through interfaces for better testability
+- **Dependency Injection**: Clean dependency management with interface-based mocking
+- **Type Safety**: Strong typing with proper error handling and validation
+- **Modular Structure**: Clear separation between data access and business logic
+
 ### **Performance Optimizations**
 - **High-Performance File Processing**: Optimized coupon file processor capable of handling 1-2 GB files with:
   - Parallel processing with worker pools (4 concurrent workers)
@@ -16,7 +29,7 @@ A robust, modular food ordering backend and supporting library, designed for ext
 
 ### **Developer Experience Enhancements**
 - **Comprehensive Documentation**: All exposed types and functions now have detailed GoDoc comments
-- **TODO: Hot Reload Development**: Local development with live reload using `air` configuration
+- **Enhanced Logger Interface**: Complete ILogger interface with all public methods documented
 - **Automated Code Quality**: Pre-commit hooks with linting, formatting, and security scanning
 - **Mock Generation**: Automated mock generation for testing with GoMock
 - **API Documentation**: Auto-generated Swagger/OpenAPI documentation
@@ -36,15 +49,24 @@ kart-challenge/
 ├── backend-challenge/
 │   ├── library/                # Shared Go library (logger, config, etc.)
 │   │   ├── logger/            # Advanced logging with file rotation and async support
+│   │   │   ├── mocks/         # Generated mocks for testing
+│   │   │   └── interface.go   # Complete ILogger interface definition
 │   │   └── config/            # Configuration management with validation
 │   ├── services/
 │   │   ├── coupons/            # Coupons microservice with optimized file processing
 │   │   │   ├── cmd/processor/  # Coupons processor entrypoint
 │   │   │   ├── internal/       # Service internals (processor, repository, config)
+│   │   │   │   ├── repository/ # Interface-based repository with generated mocks
+│   │   │   │   │   ├── mocks/  # Generated mocks for testing
+│   │   │   │   │   └── interface.go # Collection and CouponRepository interfaces
+│   │   │   │   └── processor/  # Optimized file processor with resume capability
 │   │   │   └── data/          # Sample data and test files
 │   │   └── orderfoodonline/    # Main food ordering service
 │   │       ├── cmd/rest/       # REST API entrypoint and docs
 │   │       ├── internal/       # Service internals (handlers, middlewares, routes, etc.)
+│   │       │   ├── service/    # Business logic with comprehensive unit tests
+│   │       │   ├── repository/ # Data access layer with generated mocks
+│   │       │   └── http/       # HTTP handlers with proper error handling
 │   │       ├── migrations/     # Database migrations and seeding
 │   │       └── Dockerfile      # Multi-stage build for the service
 │   └── Makefile                # Root Makefile for orchestration
@@ -62,15 +84,16 @@ kart-challenge/
 
 ### **Quick Setup & Development**
 - **One-Command Setup**: `make start` launches the entire development environment
-- **TODO: Hot Reload**: Automatic code reloading with `air` for instant feedback
+- **Hot Reload**: Automatic code reloading with `air` for instant feedback
 - **Docker Compose**: Complete environment with MongoDB, services, and networking
 - **Nix Shell**: Reproducible development environment (optional)
 
 ### **Code Quality & Testing**
 - **Pre-commit Hooks**: Automated quality gates before commits
-- **Comprehensive Testing**: Unit tests with coverage reporting
-- **Mock Generation**: Automated mock creation for isolated testing
+- **Comprehensive Testing**: Unit tests with coverage reporting and generated mocks
+- **Mock Generation**: Automated mock creation for isolated testing with GoMock
 - **Static Analysis**: Security scanning, linting, and code formatting
+- **Interface Compliance**: Automated verification of interface implementations
 
 ### **Documentation & API**
 - **Auto-generated Docs**: Swagger documentation from code comments
@@ -207,7 +230,7 @@ make -C backend-challenge/library test
 make -C backend-challenge/services/coupons test
 ```
 
-### **TODO: Development with Hot Reload**
+### **Development with Hot Reload**
 ```sh
 # The services are configured with air for hot reloading
 # Changes to Go files will automatically restart the services
@@ -298,23 +321,68 @@ Update `Order Food Online.postman_environment.json` to customize:
 
 ---
 
+## Testing Strategy
+
+### **Unit Testing Approach**
+- **Interface-Based Design**: All dependencies are abstracted through interfaces
+- **Generated Mocks**: Automated mock generation using GoMock for consistent testing
+- **Comprehensive Coverage**: Tests for all public methods and error scenarios
+- **Human-Readable Tests**: Clear Given/When/Then structure with descriptive test names
+- **Mock Validation**: Proper expectation verification and cleanup
+
+### **Test Structure**
+```go
+func TestService_Method_Success(t *testing.T) {
+    // Given: Setup with mocked dependencies
+    ctrl := gomock.NewController(t)
+    defer ctrl.Finish()
+    mockRepo := mocks.NewMockRepository(ctrl)
+    
+    // When: Execute the method under test
+    result, err := service.Method(ctx, input)
+    
+    // Then: Verify expectations and assertions
+    require.NoError(t, err)
+    assert.Equal(t, expected, result)
+}
+```
+
+### **Mock Generation**
+```sh
+# Generate mocks for interfaces
+make generate-mocks
+
+# Mocks are automatically generated in mocks/ directories
+# and used in unit tests for isolated testing
+```
+
+---
+
 ## Extending the Project
 
 ### **Adding New Microservices**
 1. Create new service under `backend-challenge/services/`
 2. Follow the established structure (cmd/, internal/, Dockerfile)
-3. Update root Makefile with new targets
-4. Add to docker-compose.local.yml
+3. Define interfaces for dependencies and generate mocks
+4. Update root Makefile with new targets
+5. Add to docker-compose.local.yml
 
 ### **Adding Shared Utilities**
 1. Add to `backend-challenge/library/`
 2. Include comprehensive tests and documentation
 3. Update go.mod dependencies
+4. Generate mocks for any new interfaces
 
 ### **Database Migrations**
 1. Add migration files to `migrations/` directory
 2. Follow the existing naming convention (0001_, 0002_, etc.)
 3. Include both schema changes and seed data
+
+### **Adding New Repository Methods**
+1. Define the method in the interface
+2. Implement in the concrete repository
+3. Generate mocks: `make generate-mocks`
+4. Write comprehensive unit tests with proper mocking
 
 ---
 
@@ -324,11 +392,13 @@ Update `Order Food Online.postman_environment.json` to customize:
 - **Port conflicts**: Ensure ports 8080 and 27017 are available
 - **Permission issues**: Run `chmod +x` on shell scripts if needed
 - **Docker issues**: Ensure Docker daemon is running
+- **Mock generation**: Run `make generate-mocks` if mocks are outdated
 
 ### **Development Tips**
 - Use `make stop && make start` to restart all services
 - Check logs with `docker compose logs -f service-name`
 - Run tests with coverage: `make -C backend-challenge/services/orderfoodonline test`
+- Regenerate mocks after interface changes: `make generate-mocks`
 
 ---
 

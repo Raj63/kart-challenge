@@ -1,0 +1,104 @@
+on:
+  workflow_call:
+    inputs:
+      check-build-status:
+        description: Whether or not to check if the go binary can be built.
+        required: false
+        type: boolean
+        default: true
+      
+      build-path:
+        description: path for go binary can be built.
+        required: true
+        type: string
+
+      target:
+        description: The target project to run the checks against.
+        required: true
+        type: string
+
+jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.target }}
+
+    outputs:
+      commit_message: ${{ steps.metadata.outputs.commit_message }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - id: metadata
+        shell: bash
+        run: |
+          echo "::set-output name=commit_message::$(git log -1 --pretty=%B)"
+
+      - name: Install Go
+        run: |
+          curl -LO https://go.dev/dl/go1.23.0.linux-amd64.tar.gz
+          sudo tar -C /usr/local -xzf go1.23.0.linux-amd64.tar.gz
+          echo "/usr/local/go/bin" >> $GITHUB_PATH
+          export PATH=$PATH:/usr/local/go/bin
+          go version
+
+      - name: Add GOPATH/bin to PATH
+        run: |
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
+      - name: Go - Check Build Status
+        if: ${{ inputs.check-build-status == true }}
+        run: |
+          go build -o /dev/null ${{ inputs.build-path }}
+
+      - name: Go - Install Tools
+        if: ${{ steps.filter.outputs.changed == 'true' }}
+        run: |
+          go install honnef.co/go/tools/cmd/staticcheck@v0.4.2
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.48.0
+          go install golang.org/x/tools/cmd/goimports@v0.12.0
+          go install github.com/securego/gosec/v2/cmd/gosec@v2.17.0
+          go install github.com/golang/mock/mockgen@v1.6.0
+
+      - name: Go - Format Code
+        if: ${{ steps.filter.outputs.changed == 'true' }}
+        run: if [ $(goimports -l -d . && git diff | wc -l) -gt 0 ]; then git diff && exit 1; fi
+
+      - name: Go - Check go.mod Status
+        if: ${{ steps.filter.outputs.changed == 'true' }}
+        shell: bash
+        run: if [ $(go mod tidy && git diff | wc -l) -gt 0 ]; then git diff && exit 1; fi
+
+      - name: Go - Generate 
+        if: ${{ steps.filter.outputs.changed == 'true' }}
+        run: if [ $(make generate && git diff | wc -l) -gt 0 ]; then git diff && exit 1; fi
+
+      - name: Go - Check Security Issues
+        if: ${{ steps.filter.outputs.changed == 'true' }}
+        run: gosec ./...
+
+      - name: Go - Check Bugs And Performance Issues
+        if: ${{ steps.filter.outputs.changed == 'true' }}
+        run: staticcheck ./...
+
+      - name: Go - Check Linting Status
+        if: ${{ steps.filter.outputs.changed == 'true' }}
+        run: golangci-lint run ./... --timeout=5m
+
+      - name: Go - Check Suspicious Constructs
+        if: ${{ steps.filter.outputs.changed == 'true' }}
+        run: go vet -v ./...
+
+      - name: Go - Check Build Status
+        if: ${{ steps.filter.outputs.changed == 'true' && inputs.check-build-status == true }}
+        run: go build -o /dev/null .
+
+      - name: Go - Check Unit Test Status
+        if: ${{ steps.filter.outputs.changed == 'true' }}
+        run: |
+          go test -race -covermode=atomic -coverprofile=coverage.out -failfast -v ./...
+          go test -race -covermode=atomic -coverprofile=coverage.out -failfast -v -json ./... > report.json
+

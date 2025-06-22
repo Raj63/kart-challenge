@@ -1,0 +1,20 @@
+name: library - CI
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  code-quality:
+    name: Code Quality
+    uses: ./.github/workflows/reusable-code-quality-go.yml
+    with:
+      check-build-status: false
+      build-path: ./
+      filters: |
+        changed:
+          - .github/workflows/reusable-code-quality-go.yml
+          - .github/workflows/library-ci.yml
+          - backend-challenge/library/**
+      target: backend-challenge/library
