@@ -11,7 +11,7 @@ jobs:
     uses: ./.github/workflows/reusable-code-quality-go.yml
     with:
       check-build-status: false
-      build-path: ./
+      build-path: .
       filters: |
         changed:
           - .github/workflows/reusable-code-quality-go.yml
