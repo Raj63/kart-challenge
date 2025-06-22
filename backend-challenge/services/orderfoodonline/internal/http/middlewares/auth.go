@@ -3,6 +3,7 @@ package middlewares
 import (
 	"library/logger"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -20,7 +21,7 @@ func NewAuthMiddleware(logger logger.ILogger) AuthMiddleware {
 // Authentication middleware to protect routes
 func (a *auth) Authenticate() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		apiKey := c.GetHeader("api_key")
+		apiKey := strings.TrimSpace(c.GetHeader("api_key"))
 		if apiKey == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "API key required"})
 			c.Abort()

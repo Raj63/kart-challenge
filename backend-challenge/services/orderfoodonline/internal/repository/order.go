@@ -2,7 +2,9 @@ package repository
 
 import (
 	"context"
+	"orderfoodonline/internal/metrics"
 	"orderfoodonline/internal/repository/models"
+	"time"
 
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,10 +23,15 @@ func NewOrderRepository(repo *Repository) OrderRepository {
 
 // PlaceOrder inserts a new order into the database and returns the created order.
 func (r *orderRepository) PlaceOrder(ctx context.Context, order *models.Order) (*models.Order, error) {
+	start := time.Now()
+
 	order.ID = uuid.New().String()
 	_, err := r.collection.InsertOne(ctx, order)
 	if err != nil {
+		metrics.RecordDatabaseQuery("insert_one", "orders", "error", time.Since(start).Seconds())
 		return nil, err
 	}
+
+	metrics.RecordDatabaseQuery("insert_one", "orders", "success", time.Since(start).Seconds())
 	return order, nil
 }

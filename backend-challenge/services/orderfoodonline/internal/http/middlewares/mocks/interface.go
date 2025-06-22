@@ -67,3 +67,41 @@ func (mr *MockAuthMiddlewareMockRecorder) Authorize() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authorize", reflect.TypeOf((*MockAuthMiddleware)(nil).Authorize))
 }
+
+// MockMetricsMiddleware is a mock of MetricsMiddleware interface.
+type MockMetricsMiddleware struct {
+	ctrl     *gomock.Controller
+	recorder *MockMetricsMiddlewareMockRecorder
+	isgomock struct{}
+}
+
+// MockMetricsMiddlewareMockRecorder is the mock recorder for MockMetricsMiddleware.
+type MockMetricsMiddlewareMockRecorder struct {
+	mock *MockMetricsMiddleware
+}
+
+// NewMockMetricsMiddleware creates a new mock instance.
+func NewMockMetricsMiddleware(ctrl *gomock.Controller) *MockMetricsMiddleware {
+	mock := &MockMetricsMiddleware{ctrl: ctrl}
+	mock.recorder = &MockMetricsMiddlewareMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockMetricsMiddleware) EXPECT() *MockMetricsMiddlewareMockRecorder {
+	return m.recorder
+}
+
+// RecordMetrics mocks base method.
+func (m *MockMetricsMiddleware) RecordMetrics() gin.HandlerFunc {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RecordMetrics")
+	ret0, _ := ret[0].(gin.HandlerFunc)
+	return ret0
+}
+
+// RecordMetrics indicates an expected call of RecordMetrics.
+func (mr *MockMetricsMiddlewareMockRecorder) RecordMetrics() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RecordMetrics", reflect.TypeOf((*MockMetricsMiddleware)(nil).RecordMetrics))
+}

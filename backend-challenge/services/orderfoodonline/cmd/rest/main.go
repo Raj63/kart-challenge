@@ -100,10 +100,11 @@ func main() {
 	productHandler := handlers.NewProductHandler(productService)
 
 	dep := routes.Dependencies{
-		AuthMiddleware: middlewares.NewAuthMiddleware(appLogger),
-		SwaggerHandler: swaggerHandler,
-		ProductHandler: productHandler,
-		OrderHandler:   orderHandler,
+		AuthMiddleware:    middlewares.NewAuthMiddleware(appLogger),
+		MetricsMiddleware: middlewares.NewMetricsMiddleware(),
+		SwaggerHandler:    swaggerHandler,
+		ProductHandler:    productHandler,
+		OrderHandler:      orderHandler,
 	}
 	// create a new http router
 	router := routes.NewRouter(appConfig, appLogger)

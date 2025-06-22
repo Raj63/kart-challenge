@@ -84,7 +84,7 @@ kart-challenge/
 
 ### **Quick Setup & Development**
 - **One-Command Setup**: `make start` launches the entire development environment
-- **Hot Reload**: Automatic code reloading with `air` for instant feedback
+- **Hot Reload-TODO**: Automatic code reloading with `air` for instant feedback
 - **Docker Compose**: Complete environment with MongoDB, services, and networking
 - **Nix Shell**: Reproducible development environment (optional)
 
@@ -106,6 +106,11 @@ kart-challenge/
 - **File Rotation**: Automatic log file management
 - **Performance Metrics**: Built-in timing and monitoring
 - **Error Tracking**: Detailed error context and stack traces
+- **Prometheus Metrics**: Comprehensive metrics collection with `/metrics` endpoint
+  - HTTP request counts, durations, and status codes
+  - Database query latency and operation counts
+  - Order processing metrics and business KPIs
+  - Active database connections monitoring
 
 ---
 
@@ -230,7 +235,7 @@ make -C backend-challenge/library test
 make -C backend-challenge/services/coupons test
 ```
 
-### **Development with Hot Reload**
+### **Development with Hot Reload-TODO**
 ```sh
 # The services are configured with air for hot reloading
 # Changes to Go files will automatically restart the services
@@ -301,6 +306,7 @@ Update `Order Food Online.postman_environment.json` to customize:
 - **Auto-generated docs:** `backend-challenge/services/orderfoodonline/cmd/rest/docs/`
 - **Health Check:** `GET /api/health`
 - **Version Info:** `GET /api/version`
+- **Prometheus Metrics:** `GET /metrics` - Comprehensive application metrics in Prometheus format
 
 ---
 
@@ -318,6 +324,51 @@ Update `Order Food Online.postman_environment.json` to customize:
 - **CORS Support**: Cross-origin resource sharing
 - **Graceful Shutdown**: Proper cleanup and timeout handling
 - **Connection Pooling**: Efficient database connection management
+
+---
+
+## Metrics & Observability
+
+### **Prometheus Metrics Endpoint**
+The application exposes comprehensive metrics at `/metrics` endpoint in Prometheus format for monitoring and alerting.
+
+#### **Available Metrics**
+- **HTTP Metrics**
+  - `http_requests_total` - Total request count by method, endpoint, and status code
+  - `http_request_duration_seconds` - Request duration histogram by method and endpoint
+
+- **Database Metrics**
+  - `database_queries_total` - Database operation counts by operation, collection, and status
+  - `database_query_duration_seconds` - Query duration histogram by operation and collection
+  - `database_active_connections` - Number of active database connections
+
+- **Business Metrics**
+  - `order_processing_duration_seconds` - Order processing time by status
+  - `orders_total` - Order counts by status (success, validation_error, etc.)
+
+#### **Usage Examples**
+```bash
+# View metrics in browser
+curl http://localhost:8080/metrics
+
+# Scrape with Prometheus
+# Add to prometheus.yml:
+scrape_configs:
+  - job_name: 'orderfoodonline'
+    static_configs:
+      - targets: ['localhost:8080']
+    metrics_path: '/metrics'
+
+# Monitor specific metrics
+curl http://localhost:8080/metrics | grep http_requests_total
+curl http://localhost:8080/metrics | grep database_query_duration_seconds
+```
+
+#### **Integration**
+- **Grafana Dashboards**: Create custom dashboards for business and technical metrics
+- **Alerting**: Set up alerts for high error rates, slow queries, or business anomalies
+- **SLA Monitoring**: Track API response times and availability
+- **Capacity Planning**: Monitor database connection usage and query performance
 
 ---
 

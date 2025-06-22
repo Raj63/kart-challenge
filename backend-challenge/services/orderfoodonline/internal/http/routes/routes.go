@@ -12,6 +12,9 @@ func validateDependencies(d Dependencies) error {
 	if d.AuthMiddleware == nil {
 		return fmt.Errorf("authMiddleware cannot be nil")
 	}
+	if d.MetricsMiddleware == nil {
+		return fmt.Errorf("metricsMiddleware cannot be nil")
+	}
 	if d.ProductHandler == nil {
 		return fmt.Errorf("productHandler cannot be nil")
 	}

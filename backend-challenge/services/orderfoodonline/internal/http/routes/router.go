@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"orderfoodonline/internal/config"
 	"orderfoodonline/internal/constants"
@@ -115,6 +116,9 @@ func (r *Router) Init(dep Dependencies) error {
 // It configures rate limiting, CORS, authentication, and health check endpoints.
 // Swagger documentation is only enabled in local development environment.
 func (r *Router) setupMiddleware(dep Dependencies) {
+	// Metrics middleware (should be first to capture all requests)
+	r.engine.Use(dep.MetricsMiddleware.RecordMetrics())
+
 	// RateLimiter middleware
 	r.engine.Use(middlewares.RateLimiterHandler())
 
@@ -136,6 +140,9 @@ func (r *Router) setupMiddleware(dep Dependencies) {
 			"commit_hash": constants.CommitHash,
 		})
 	})
+
+	// Metrics endpoint for Prometheus
+	r.engine.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	// Swagger Page handler
 	if r.config.Env == "local" {

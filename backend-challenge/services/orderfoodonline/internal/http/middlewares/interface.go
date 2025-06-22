@@ -15,3 +15,9 @@ type AuthMiddleware interface {
 	// and authorizes access to protected endpoints.
 	Authorize() gin.HandlerFunc
 }
+
+// MetricsMiddleware provides HTTP request metrics collection using Prometheus.
+type MetricsMiddleware interface {
+	// RecordMetrics is a Gin middleware that records HTTP request metrics.
+	RecordMetrics() gin.HandlerFunc
+}
