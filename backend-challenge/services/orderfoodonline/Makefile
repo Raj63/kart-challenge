@@ -7,6 +7,9 @@ build:
 	docker build -t orderfoodonline .
 
 test:
+	go test -failfast -v ./...
+
+test-with-coverage:
 	go test -failfast -v ./... -coverprofile=coverage/coverage.out && go tool cover -html=coverage/coverage.out -o coverage/coverage.html && go tool cover -func coverage/coverage.out
 
 generate-mocks:

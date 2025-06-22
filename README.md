@@ -156,6 +156,11 @@ docker compose -f docker-compose.local.yml up --build
 - `stop` – Stop all services
 - `precommit-orderfoodonline` – Generate docs/mocks, build, and test orderfoodonline
 - `precommit-coupons` – Generate docs/mocks, build, and test coupons service
+- `test-api` – Run Postman collection tests with default settings
+- `test-api-env` – Run Postman collection tests using environment file
+- `test-api-npx` – Run Postman collection tests using npx (no global install required)
+- `test-api-with-key` – Run Postman collection tests with custom API key
+- `install-newman` – Install Newman CLI tool for Postman testing
 
 ### Service Level (e.g., `backend-challenge/services/orderfoodonline/Makefile`)
 - `dep` – Run `go mod tidy`
@@ -207,6 +212,62 @@ make -C backend-challenge/services/coupons test
 # The services are configured with air for hot reloading
 # Changes to Go files will automatically restart the services
 ```
+
+---
+
+## API Testing
+
+### **Postman Collection Testing**
+
+The project includes a comprehensive Postman collection for testing all API endpoints. You can run the tests using Newman (Postman's CLI tool).
+
+#### **Quick API Testing**
+```sh
+# Run tests with npx (recommended - no global install required)
+make test-api-npx
+
+# Run tests using environment file
+make test-api-env
+
+# Run tests with custom API key
+make test-api-with-key
+```
+
+#### **Manual Setup**
+```sh
+# Option 1: Use npx (no installation required)
+npx newman run "Order Food Online.postman_collection.json" \
+  --environment "Order Food Online.postman_environment.json"
+
+# Option 2: Install Newman globally
+make install-newman
+# or manually:
+npm install -g newman --unsafe-perm=true
+# or with sudo:
+sudo npm install -g newman
+
+# Option 3: Install via Homebrew (macOS)
+brew install newman
+
+# Run collection with environment file
+newman run "Order Food Online.postman_collection.json" \
+  --environment "Order Food Online.postman_environment.json" \
+  --reporters cli,json \
+  --reporter-json-export postman-results.json
+```
+
+#### **Test Results**
+- **CLI Output**: Real-time test results in the terminal
+- **JSON Report**: Detailed results saved to `postman-results.json`
+- **Coverage**: Tests all endpoints including authentication, products, and orders
+- **Validation**: Response time, status codes, and data structure validation
+
+#### **Environment Variables**
+Update `Order Food Online.postman_environment.json` to customize:
+- `host`: API host (default: localhost)
+- `port`: API port (default: 8080)
+- `api_key`: Your API key for authentication
+- `firstProductId`: Auto-populated by tests for dependent requests
 
 ---
 

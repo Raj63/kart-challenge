@@ -13,15 +13,15 @@ import (
 
 // couponRepository provides MongoDB-backed access to coupon data.
 type couponRepository struct {
-	collection     *mongo.Collection
-	processedFiles *mongo.Collection
+	couponCollection         Collection
+	processedFilesCollection Collection
 }
 
 // NewCouponRepository creates a new CouponRepository using the given MongoDB database.
 func NewCouponRepository(repo *Repository) CouponRepository {
 	return &couponRepository{
-		collection:     repo.db.Collection("coupons"),
-		processedFiles: repo.db.Collection("processed-coupon-files"),
+		couponCollection:         repo.db.Collection("coupons"),
+		processedFilesCollection: repo.db.Collection("processed-coupon-files"),
 	}
 }
 
@@ -59,7 +59,7 @@ func (c *couponRepository) AddCoupons(ctx context.Context, fileName string, code
 		return nil
 	}
 
-	_, err := c.collection.BulkWrite(ctx, models)
+	_, err := c.couponCollection.BulkWrite(ctx, models)
 	if err != nil {
 		return fmt.Errorf("failed to upsert coupons: %w", err)
 	}
@@ -71,7 +71,7 @@ func (c *couponRepository) AddCoupons(ctx context.Context, fileName string, code
 func (c *couponRepository) DeactivateCoupons(ctx context.Context, fileName string, codes []string) error {
 	filter := bson.M{"file_name": fileName, "coupon_code": bson.M{"$in": codes}}
 	update := bson.M{"$set": bson.M{"isactive": false}}
-	_, err := c.collection.UpdateMany(ctx, filter, update)
+	_, err := c.couponCollection.UpdateMany(ctx, filter, update)
 	if err != nil {
 		return fmt.Errorf("failed to deactivate coupons: %w", err)
 	}
@@ -82,7 +82,7 @@ func (c *couponRepository) DeactivateCoupons(ctx context.Context, fileName strin
 func (c *couponRepository) IsFileProcessed(ctx context.Context, isAdd bool, filename string) (*models.ProcessedCouponFile, error) {
 	filter := bson.M{"$and": []bson.M{{"isadd": isAdd}, {"file_name": filename}}}
 	processedFile := &models.ProcessedCouponFile{}
-	err := c.processedFiles.FindOne(ctx, filter).Decode(&processedFile)
+	err := c.processedFilesCollection.FindOne(ctx, filter).Decode(&processedFile)
 	if err == mongo.ErrNoDocuments {
 		return nil, nil
 	}
@@ -94,7 +94,7 @@ func (c *couponRepository) IsFileProcessed(ctx context.Context, isAdd bool, file
 
 // InsertProcessedFile inserts a record for a processed file.
 func (c *couponRepository) InsertProcessedFile(ctx context.Context, file *models.ProcessedCouponFile) error {
-	_, err := c.processedFiles.InsertOne(ctx, file)
+	_, err := c.processedFilesCollection.InsertOne(ctx, file)
 	if err != nil {
 		return fmt.Errorf("failed to insert processed file: %w", err)
 	}
@@ -105,7 +105,7 @@ func (c *couponRepository) InsertProcessedFile(ctx context.Context, file *models
 func (c *couponRepository) UpdateProcessingStatus(ctx context.Context, id, status string, total int64) error {
 	filter := bson.M{"id": id}
 	update := bson.M{"$set": bson.M{"status": status, "coupon_code_counts": total}}
-	_, err := c.processedFiles.UpdateOne(ctx, filter, update)
+	_, err := c.processedFilesCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return fmt.Errorf("failed to update processing status: %w", err)
 	}

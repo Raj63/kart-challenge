@@ -28,12 +28,12 @@ import (
 type Router struct {
 	engine *gin.Engine    // Gin HTTP engine instance
 	config *config.Config // Application configuration
-	logger *logger.Logger // Application logger
+	logger logger.ILogger // Application logger
 }
 
 // NewRouter creates a new Router instance with the provided configuration and logger.
 // It initializes a Gin engine in default mode and returns a configured router.
-func NewRouter(config *config.Config, logger *logger.Logger) *Router {
+func NewRouter(config *config.Config, logger logger.ILogger) *Router {
 	// Set up Gin router
 	// Use gin.ReleaseMode for production
 	// Use gin.DebugMode for local development

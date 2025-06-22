@@ -148,8 +148,17 @@ const docTemplate = `{
                             }
                         }
                     },
-                    "422": {
+                    "404": {
                         "description": "error\":\"product not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "error\":\"invalid coupon code",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -220,15 +229,19 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "category": {
+                    "description": "Product category",
                     "type": "string"
                 },
                 "id": {
+                    "description": "Unique identifier for the product",
                     "type": "string"
                 },
                 "name": {
+                    "description": "Product name",
                     "type": "string"
                 },
                 "price": {
+                    "description": "Product price",
                     "type": "number"
                 }
             }

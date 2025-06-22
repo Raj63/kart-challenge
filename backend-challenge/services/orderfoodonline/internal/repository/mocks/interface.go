@@ -41,6 +41,20 @@ func (m *MockProductRepository) EXPECT() *MockProductRepositoryMockRecorder {
 	return m.recorder
 }
 
+// BulkInsertProducts mocks base method.
+func (m *MockProductRepository) BulkInsertProducts(ctx context.Context, products []models.Product) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BulkInsertProducts", ctx, products)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BulkInsertProducts indicates an expected call of BulkInsertProducts.
+func (mr *MockProductRepositoryMockRecorder) BulkInsertProducts(ctx, products any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkInsertProducts", reflect.TypeOf((*MockProductRepository)(nil).BulkInsertProducts), ctx, products)
+}
+
 // FindProductByID mocks base method.
 func (m *MockProductRepository) FindProductByID(ctx context.Context, id string) (*models.Product, error) {
 	m.ctrl.T.Helper()
@@ -56,6 +70,35 @@ func (mr *MockProductRepositoryMockRecorder) FindProductByID(ctx, id any) *gomoc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindProductByID", reflect.TypeOf((*MockProductRepository)(nil).FindProductByID), ctx, id)
 }
 
+// GetAppliedMigrations mocks base method.
+func (m *MockProductRepository) GetAppliedMigrations(ctx context.Context) ([]models.Migration, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAppliedMigrations", ctx)
+	ret0, _ := ret[0].([]models.Migration)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAppliedMigrations indicates an expected call of GetAppliedMigrations.
+func (mr *MockProductRepositoryMockRecorder) GetAppliedMigrations(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAppliedMigrations", reflect.TypeOf((*MockProductRepository)(nil).GetAppliedMigrations), ctx)
+}
+
+// InsertMigration mocks base method.
+func (m *MockProductRepository) InsertMigration(ctx context.Context, migration *models.Migration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertMigration", ctx, migration)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertMigration indicates an expected call of InsertMigration.
+func (mr *MockProductRepositoryMockRecorder) InsertMigration(ctx, migration any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertMigration", reflect.TypeOf((*MockProductRepository)(nil).InsertMigration), ctx, migration)
+}
+
 // ListProducts mocks base method.
 func (m *MockProductRepository) ListProducts(ctx context.Context) ([]models.Product, error) {
 	m.ctrl.T.Helper()
@@ -69,6 +112,20 @@ func (m *MockProductRepository) ListProducts(ctx context.Context) ([]models.Prod
 func (mr *MockProductRepositoryMockRecorder) ListProducts(ctx any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListProducts", reflect.TypeOf((*MockProductRepository)(nil).ListProducts), ctx)
+}
+
+// UpdateMigration mocks base method.
+func (m *MockProductRepository) UpdateMigration(ctx context.Context, migration *models.Migration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateMigration", ctx, migration)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateMigration indicates an expected call of UpdateMigration.
+func (mr *MockProductRepositoryMockRecorder) UpdateMigration(ctx, migration any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMigration", reflect.TypeOf((*MockProductRepository)(nil).UpdateMigration), ctx, migration)
 }
 
 // MockOrderRepository is a mock of OrderRepository interface.
@@ -108,4 +165,43 @@ func (m *MockOrderRepository) PlaceOrder(ctx context.Context, order *models.Orde
 func (mr *MockOrderRepositoryMockRecorder) PlaceOrder(ctx, order any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PlaceOrder", reflect.TypeOf((*MockOrderRepository)(nil).PlaceOrder), ctx, order)
+}
+
+// MockCouponRepository is a mock of CouponRepository interface.
+type MockCouponRepository struct {
+	ctrl     *gomock.Controller
+	recorder *MockCouponRepositoryMockRecorder
+	isgomock struct{}
+}
+
+// MockCouponRepositoryMockRecorder is the mock recorder for MockCouponRepository.
+type MockCouponRepositoryMockRecorder struct {
+	mock *MockCouponRepository
+}
+
+// NewMockCouponRepository creates a new mock instance.
+func NewMockCouponRepository(ctrl *gomock.Controller) *MockCouponRepository {
+	mock := &MockCouponRepository{ctrl: ctrl}
+	mock.recorder = &MockCouponRepositoryMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockCouponRepository) EXPECT() *MockCouponRepositoryMockRecorder {
+	return m.recorder
+}
+
+// ValidateCouponCode mocks base method.
+func (m *MockCouponRepository) ValidateCouponCode(ctx context.Context, couponCode string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateCouponCode", ctx, couponCode)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateCouponCode indicates an expected call of ValidateCouponCode.
+func (mr *MockCouponRepositoryMockRecorder) ValidateCouponCode(ctx, couponCode any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateCouponCode", reflect.TypeOf((*MockCouponRepository)(nil).ValidateCouponCode), ctx, couponCode)
 }

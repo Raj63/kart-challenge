@@ -22,11 +22,11 @@ import (
 // MigrationService handles database migrations and seeding.
 type MigrationService struct {
 	repo repository.ProductRepository
-	log  *logger.Logger
+	log  logger.ILogger
 }
 
 // NewMigrationService creates a new MigrationService.
-func NewMigrationService(repo repository.ProductRepository, log *logger.Logger) *MigrationService {
+func NewMigrationService(repo repository.ProductRepository, log logger.ILogger) *MigrationService {
 	return &MigrationService{
 		repo: repo,
 		log:  log,

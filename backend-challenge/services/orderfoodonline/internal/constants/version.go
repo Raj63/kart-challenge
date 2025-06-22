@@ -5,5 +5,5 @@ package constants
 // CommitHash is the current commit hash of the application.
 const (
 	Version    = "0.1.0"   // Application version
-	CommitHash = "74c46d2" // Git commit hash
+	CommitHash = "889cbae" // Git commit hash
 )

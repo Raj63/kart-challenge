@@ -9,11 +9,11 @@ import (
 
 // auth provides authentication and authorization middleware.
 type auth struct {
-	logger *logger.Logger
+	logger logger.ILogger
 }
 
 // NewAuthMiddleware creates a new instance of auth middleware which implements AuthMiddleware.
-func NewAuthMiddleware(logger *logger.Logger) AuthMiddleware {
+func NewAuthMiddleware(logger logger.ILogger) AuthMiddleware {
 	return &auth{logger: logger}
 }
 

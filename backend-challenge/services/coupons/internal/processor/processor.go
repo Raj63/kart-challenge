@@ -7,6 +7,8 @@ import (
 	"bufio"
 	"compress/gzip"
 	"context"
+
+	// #nosec G501 -- MD5 used for non-cryptographic hash of local files
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -32,13 +34,17 @@ import (
 // batch operations, and maintains processing state for resume functionality.
 type CouponProcessor struct {
 	repo            repository.CouponRepository // Repository for database operations
-	log             *logger.Logger              // Application logger
+	log             logger.ILogger              // Application logger
 	processorConfig *config.ProcessorConfig     // Processor configuration settings
 }
 
 // NewCouponProcessor creates a new CouponProcessor instance with the provided dependencies.
 // It initializes the processor with repository, configuration, and logger components.
-func NewCouponProcessor(repo repository.CouponRepository, processorConfig *config.ProcessorConfig, log *logger.Logger) *CouponProcessor {
+func NewCouponProcessor(repo repository.CouponRepository, processorConfig *config.ProcessorConfig, log logger.ILogger) *CouponProcessor {
+	// Optimize batch size for large files
+	if processorConfig.BatchSize < 1 {
+		processorConfig.BatchSize = 5000
+	}
 	return &CouponProcessor{repo: repo, processorConfig: processorConfig, log: log}
 }
 
@@ -48,10 +54,10 @@ func NewCouponProcessor(repo repository.CouponRepository, processorConfig *confi
 func (p *CouponProcessor) Run(ctx context.Context) error {
 	addDir := fmt.Sprintf("%s/add", p.processorConfig.DataDirectory)
 	removeDir := fmt.Sprintf("%s/remove", p.processorConfig.DataDirectory)
-	if err := os.MkdirAll(addDir, 0755); err != nil {
+	if err := os.MkdirAll(addDir, 0750); err != nil {
 		return fmt.Errorf("failed to create add dir: %w", err)
 	}
-	if err := os.MkdirAll(removeDir, 0755); err != nil {
+	if err := os.MkdirAll(removeDir, 0750); err != nil {
 		return fmt.Errorf("failed to create remove dir: %w", err)
 	}
 	p.log.Info("Watching directories: %s, %s", addDir, removeDir)
@@ -115,7 +121,7 @@ type batchProcessor struct {
 	repo     repository.CouponRepository // Repository for database operations
 	isAdd    bool                        // Flag indicating if this is an add operation
 	fileName string                      // Name of the source file being processed
-	log      *logger.Logger              // Application logger
+	log      logger.ILogger              // Application logger
 }
 
 // processBatch processes a batch of coupon codes using the appropriate repository operation.
@@ -138,6 +144,7 @@ func (p *CouponProcessor) handleGzFile(ctx context.Context, path string, isAdd b
 	p.log.Info("Processing file: %s", path)
 
 	// Open file and compute hash efficiently
+	// #nosec G304 -- path is validated or internal-only, safe to open
 	file, err := os.Open(path)
 	if err != nil {
 		p.log.Error("failed to open file: %v", err)
@@ -146,6 +153,7 @@ func (p *CouponProcessor) handleGzFile(ctx context.Context, path string, isAdd b
 	defer file.Close()
 
 	// Compute MD5 and size with larger buffer for better performance
+	// #nosec G401 -- using md5 only for non-cryptographic file identity
 	hash := md5.New()
 	stat, err := file.Stat()
 	if err != nil {
@@ -161,7 +169,11 @@ func (p *CouponProcessor) handleGzFile(ctx context.Context, path string, isAdd b
 		return
 	}
 	md5sum := hex.EncodeToString(hash.Sum(nil))
-	file.Seek(0, io.SeekStart) // Reset file pointer for reading
+	_, err = file.Seek(0, io.SeekStart) // Reset file pointer for reading
+	if err != nil {
+		p.log.Error("failed to seek to start: %v", err)
+		return
+	}
 
 	fileName := filepath.Base(path)
 	alreadyProcessed, err := p.repo.IsFileProcessed(ctx, isAdd, fileName)
@@ -181,14 +193,10 @@ func (p *CouponProcessor) handleGzFile(ctx context.Context, path string, isAdd b
 		if alreadyProcessed.Status == "failed" && alreadyProcessed.CouponCodeCount > 0 {
 			resumeCount = alreadyProcessed.CouponCodeCount
 			processedFileID = alreadyProcessed.ID
+			md5sum = alreadyProcessed.MD5Hash
+			size = alreadyProcessed.Size
 			p.log.Info("Resuming %s from line %d", fileName, alreadyProcessed.CouponCodeCount+1)
 		}
-	}
-
-	// Optimize batch size for large files
-	batchSize := 5000 // Increased from 1000
-	if p.processorConfig.BatchSize > 0 {
-		batchSize = p.processorConfig.BatchSize
 	}
 
 	gz, err := gzip.NewReader(file)
@@ -212,26 +220,33 @@ func (p *CouponProcessor) handleGzFile(ctx context.Context, path string, isAdd b
 		MD5Hash:         md5sum,
 		FileName:        fileName,
 		Size:            size,
-		CouponCodeCount: 0,
+		CouponCodeCount: resumeCount,
 		Datetime:        time.Now().Unix(),
 		IsAdd:           isAdd,
 		Status:          "initiated",
 	}
-
-	if err := p.repo.InsertProcessedFile(ctx, processed); err != nil {
-		p.log.Error("failed to record processed file: %v", err)
+	if resumeCount > 0 {
+		if err := p.repo.UpdateProcessingStatus(ctx, processed.ID, "initiated", resumeCount); err != nil {
+			p.log.Error("failed to record processed file: %v", err)
+			return
+		}
+	} else {
+		if err := p.repo.InsertProcessedFile(ctx, processed); err != nil {
+			p.log.Error("failed to record processed file: %v", err)
+			return
+		}
 	}
 
 	var total int64
 	status := "failed"
 	defer func() {
-		if err := p.repo.UpdateProcessingStatus(ctx, processed.ID, status, total); err != nil {
+		if err := p.repo.UpdateProcessingStatus(ctx, processed.ID, status, resumeCount+total); err != nil {
 			p.log.Error("failed to record processed file: %v", err)
 		}
 	}()
 
 	// Use optimized processing with worker pool
-	total, err = p.processFileOptimized(ctx, gz, bp, int(batchSize), resumeCount, fileName)
+	total, err = p.processFileOptimized(ctx, gz, bp, p.processorConfig.BatchSize, resumeCount, fileName)
 	if err != nil {
 		p.log.Error("failed to process file %s: %v", fileName, err)
 		return

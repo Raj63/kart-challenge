@@ -18,11 +18,11 @@ type ProductResponse struct {
 
 type productService struct {
 	repo   repository.ProductRepository
-	logger *logger.Logger
+	logger logger.ILogger
 }
 
 // NewProductService creates a new ProductService.
-func NewProductService(repo repository.ProductRepository, logger *logger.Logger) ProductService {
+func NewProductService(repo repository.ProductRepository, logger logger.ILogger) ProductService {
 	return &productService{repo: repo, logger: logger}
 }
 

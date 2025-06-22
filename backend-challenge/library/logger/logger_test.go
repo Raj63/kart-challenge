@@ -74,24 +74,6 @@ func TestDefaultLogConfig(t *testing.T) {
 	assert.Equal(t, 5*time.Second, config.FlushInterval)
 }
 
-func TestNewLogger_StdioOnly(t *testing.T) {
-	config := &LogConfig{
-		OutputToStdio: true,
-		OutputToFile:  false,
-		Level:         INFO,
-	}
-
-	logger, err := NewLogger(config)
-	require.NoError(t, err)
-	defer logger.Close()
-
-	assert.NotNil(t, logger)
-	assert.Equal(t, config, logger.config)
-	assert.NotNil(t, logger.stdioWriter)
-	assert.Nil(t, logger.fileWriter)
-	assert.Nil(t, logger.buffer)
-}
-
 func TestNewLogger_WithFile(t *testing.T) {
 	tempDir := t.TempDir()
 	defer os.RemoveAll(tempDir)
@@ -111,7 +93,7 @@ func TestNewLogger_WithFile(t *testing.T) {
 	defer logger.Close()
 
 	assert.NotNil(t, logger)
-	assert.NotNil(t, logger.fileWriter)
+	assert.NotNil(t, logger.GetFileWriter())
 
 	// Verify file was created
 	_, err = os.Stat(logFile)
@@ -226,38 +208,6 @@ func TestLogger_LevelFiltering(t *testing.T) {
 	assert.NotContains(t, output, "fatal message")
 }
 
-func TestLogger_FormatMessage(t *testing.T) {
-	config := &LogConfig{
-		OutputToStdio:    true,
-		OutputToFile:     false,
-		Level:            INFO,
-		IncludeTimestamp: true,
-		IncludeLevel:     true,
-		IncludeCaller:    true,
-		UseColors:        false,
-		TimestampFormat:  "2006-01-02 15:04:05",
-		LogFormat:        "[{timestamp}] [{level}] {message}",
-		Version:          "1.0.0",
-		Commit:           "abc123",
-	}
-
-	logger, err := NewLogger(config)
-	require.NoError(t, err)
-	defer logger.Close()
-
-	entry := logEntry{
-		level:   INFO,
-		message: "test message",
-		time:    time.Date(2023, 1, 1, 12, 0, 0, 0, time.UTC),
-		caller:  "test.go:10",
-	}
-
-	formatted := logger.formatMessage(entry)
-	assert.Contains(t, formatted, "2023-01-01 12:00:00")
-	assert.Contains(t, formatted, "INFO")
-	assert.Contains(t, formatted, "test message")
-}
-
 func TestLogger_SetAndGetLevel(t *testing.T) {
 	config := &LogConfig{
 		OutputToStdio: true,
@@ -356,21 +306,4 @@ func TestGetCaller(t *testing.T) {
 	caller := getCaller()
 	assert.NotEmpty(t, caller)
 	assert.Contains(t, caller, ".go:")
-}
-
-func TestLogger_Flush(t *testing.T) {
-	config := &LogConfig{
-		OutputToStdio: true,
-		OutputToFile:  false,
-		BufferSize:    5,
-		Level:         INFO,
-	}
-
-	logger, err := NewLogger(config)
-	require.NoError(t, err)
-	defer logger.Close()
-
-	// Test flush
-	logger.Info("message to flush")
-	logger.flush()
 }

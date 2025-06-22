@@ -14,8 +14,133 @@ import (
 	models "coupons/internal/repository/models"
 	reflect "reflect"
 
+	mongo "go.mongodb.org/mongo-driver/mongo"
+	options "go.mongodb.org/mongo-driver/mongo/options"
 	gomock "go.uber.org/mock/gomock"
 )
+
+// MockCollection is a mock of Collection interface.
+type MockCollection struct {
+	ctrl     *gomock.Controller
+	recorder *MockCollectionMockRecorder
+	isgomock struct{}
+}
+
+// MockCollectionMockRecorder is the mock recorder for MockCollection.
+type MockCollectionMockRecorder struct {
+	mock *MockCollection
+}
+
+// NewMockCollection creates a new mock instance.
+func NewMockCollection(ctrl *gomock.Controller) *MockCollection {
+	mock := &MockCollection{ctrl: ctrl}
+	mock.recorder = &MockCollectionMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockCollection) EXPECT() *MockCollectionMockRecorder {
+	return m.recorder
+}
+
+// BulkWrite mocks base method.
+func (m *MockCollection) BulkWrite(ctx context.Context, arg1 []mongo.WriteModel, opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx, arg1}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "BulkWrite", varargs...)
+	ret0, _ := ret[0].(*mongo.BulkWriteResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BulkWrite indicates an expected call of BulkWrite.
+func (mr *MockCollectionMockRecorder) BulkWrite(ctx, arg1 any, opts ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx, arg1}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BulkWrite", reflect.TypeOf((*MockCollection)(nil).BulkWrite), varargs...)
+}
+
+// FindOne mocks base method.
+func (m *MockCollection) FindOne(ctx context.Context, filter any, opts ...*options.FindOneOptions) *mongo.SingleResult {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx, filter}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "FindOne", varargs...)
+	ret0, _ := ret[0].(*mongo.SingleResult)
+	return ret0
+}
+
+// FindOne indicates an expected call of FindOne.
+func (mr *MockCollectionMockRecorder) FindOne(ctx, filter any, opts ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx, filter}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindOne", reflect.TypeOf((*MockCollection)(nil).FindOne), varargs...)
+}
+
+// InsertOne mocks base method.
+func (m *MockCollection) InsertOne(ctx context.Context, document any, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx, document}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InsertOne", varargs...)
+	ret0, _ := ret[0].(*mongo.InsertOneResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InsertOne indicates an expected call of InsertOne.
+func (mr *MockCollectionMockRecorder) InsertOne(ctx, document any, opts ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx, document}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertOne", reflect.TypeOf((*MockCollection)(nil).InsertOne), varargs...)
+}
+
+// UpdateMany mocks base method.
+func (m *MockCollection) UpdateMany(ctx context.Context, filter, update any, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx, filter, update}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateMany", varargs...)
+	ret0, _ := ret[0].(*mongo.UpdateResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateMany indicates an expected call of UpdateMany.
+func (mr *MockCollectionMockRecorder) UpdateMany(ctx, filter, update any, opts ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx, filter, update}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateMany", reflect.TypeOf((*MockCollection)(nil).UpdateMany), varargs...)
+}
+
+// UpdateOne mocks base method.
+func (m *MockCollection) UpdateOne(ctx context.Context, filter, update any, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx, filter, update}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UpdateOne", varargs...)
+	ret0, _ := ret[0].(*mongo.UpdateResult)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UpdateOne indicates an expected call of UpdateOne.
+func (mr *MockCollectionMockRecorder) UpdateOne(ctx, filter, update any, opts ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx, filter, update}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOne", reflect.TypeOf((*MockCollection)(nil).UpdateOne), varargs...)
+}
 
 // MockCouponRepository is a mock of CouponRepository interface.
 type MockCouponRepository struct {

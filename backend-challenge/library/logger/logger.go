@@ -137,7 +137,6 @@ type Logger struct {
 	fileWriter  io.WriteCloser
 	stdioWriter io.Writer
 	mu          sync.Mutex
-	buffer      chan logEntry
 	stopChan    chan struct{}
 }
 
@@ -150,7 +149,7 @@ type logEntry struct {
 }
 
 // NewLogger creates a new logger instance
-func NewLogger(config *LogConfig) (*Logger, error) {
+func NewLogger(config *LogConfig) (ILogger, error) {
 	logger := &Logger{
 		config:   config,
 		stopChan: make(chan struct{}),

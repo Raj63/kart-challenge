@@ -16,7 +16,7 @@ type swaggerHandler struct {
 }
 
 // NewSwaggerHandler creates a new SwaggerHandler for serving Swagger documentation.
-func NewSwaggerHandler(config *config.SwaggerConfig, logger *logger.Logger) (SwaggerHandler, error) {
+func NewSwaggerHandler(config *config.SwaggerConfig, logger logger.ILogger) (SwaggerHandler, error) {
 	// Read full Swagger JSON
 	jsonData, err := os.ReadFile(config.FilePath)
 	if err != nil {

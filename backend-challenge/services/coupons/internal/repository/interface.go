@@ -5,7 +5,21 @@ import (
 	"context"
 
 	"coupons/internal/repository/models"
+
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+// Collection defines the interface for MongoDB collection operations.
+// It provides methods for bulk write, update, find, and insert operations
+// that are commonly used in the coupon repository.
+type Collection interface {
+	BulkWrite(ctx context.Context, models []mongo.WriteModel, opts ...*options.BulkWriteOptions) (*mongo.BulkWriteResult, error)
+	UpdateMany(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+	FindOne(ctx context.Context, filter interface{}, opts ...*options.FindOneOptions) *mongo.SingleResult
+	InsertOne(ctx context.Context, document interface{}, opts ...*options.InsertOneOptions) (*mongo.InsertOneResult, error)
+	UpdateOne(ctx context.Context, filter interface{}, update interface{}, opts ...*options.UpdateOptions) (*mongo.UpdateResult, error)
+}
 
 // CouponRepository defines methods for managing coupons in the database.
 // It provides operations for adding and deactivating coupon codes, as well as

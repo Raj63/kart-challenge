@@ -13,12 +13,12 @@ type orderService struct {
 	repo        repository.OrderRepository
 	productRepo repository.ProductRepository
 	couponRepo  repository.CouponRepository
-	logger      *logger.Logger
+	logger      logger.ILogger
 }
 
 // NewOrderService creates a new OrderService.
 func NewOrderService(repo repository.OrderRepository, productRepo repository.ProductRepository,
-	couponRepo repository.CouponRepository, logger *logger.Logger) OrderService {
+	couponRepo repository.CouponRepository, logger logger.ILogger) OrderService {
 	return &orderService{repo: repo, productRepo: productRepo, couponRepo: couponRepo, logger: logger}
 }
 
