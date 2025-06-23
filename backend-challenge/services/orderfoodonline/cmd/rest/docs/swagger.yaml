@@ -82,7 +82,7 @@ paths:
               $ref: '#/definitions/service.ProductResponse'
             type: array
         "500":
-          description: error":"failed to fetch products
+          description: error":"Failed to fetch products
           schema:
             additionalProperties:
               type: string
@@ -107,19 +107,19 @@ paths:
           schema:
             $ref: '#/definitions/service.ProductResponse'
         "400":
-          description: error":"productId is required
+          description: error":"Invalid ID supplied
           schema:
             additionalProperties:
               type: string
             type: object
         "404":
-          description: error":"product not found
+          description: error":"Product not found
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
-          description: error":"failed to fetch product
+          description: error":"Failed to fetch product
           schema:
             additionalProperties:
               type: string
@@ -147,25 +147,25 @@ paths:
           schema:
             $ref: '#/definitions/models.Order'
         "400":
-          description: error":"no items in order
+          description: error":"Invalid input
           schema:
             additionalProperties:
               type: string
             type: object
         "404":
-          description: error":"product not found
+          description: error":"Product not found
           schema:
             additionalProperties:
               type: string
             type: object
         "422":
-          description: error":"invalid coupon code
+          description: error":"Validation exception
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
-          description: error":"failed to place order
+          description: error":"Failed to place an order
           schema:
             additionalProperties:
               type: string

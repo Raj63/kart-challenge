@@ -23,12 +23,12 @@ func NewProductHandler(service service.ProductService) ProductHandler {
 // @Tags product
 // @Produce json
 // @Success 200 {array} service.ProductResponse
-// @Failure 500 {object} map[string]string "error":"failed to fetch products"
+// @Failure 500 {object} map[string]string "error":"Failed to fetch products"
 // @Router /api/product [get]
 func (h *productHandler) ListProducts(c *gin.Context) {
-	products, err := h.service.ListProducts(c.Request.Context())
+	products, err := h.service.ListProducts(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch products"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch products"})
 		return
 	}
 	c.JSON(http.StatusOK, products)
@@ -41,23 +41,23 @@ func (h *productHandler) ListProducts(c *gin.Context) {
 // @Produce json
 // @Param productId path string true "Product ID"
 // @Success 200 {object} service.ProductResponse
-// @Failure 400 {object} map[string]string "error":"productId is required"
-// @Failure 404 {object} map[string]string "error":"product not found"
-// @Failure 500 {object} map[string]string "error":"failed to fetch product"
+// @Failure 400 {object} map[string]string "error":"Invalid ID supplied"
+// @Failure 404 {object} map[string]string "error":"Product not found"
+// @Failure 500 {object} map[string]string "error":"Failed to fetch product"
 // @Router /api/product/{productId} [get]
 func (h *productHandler) GetProductByID(c *gin.Context) {
 	id := strings.TrimSpace(c.Param("productId"))
 	if id == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "productId is required"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid ID supplied"})
 		return
 	}
-	product, err := h.service.FindProductByID(c.Request.Context(), id)
+	product, err := h.service.FindProductByID(c, id)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch product"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch product"})
 		return
 	}
 	if product == nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "product not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Product not found"})
 		return
 	}
 	c.JSON(http.StatusOK, product)

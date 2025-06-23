@@ -41,7 +41,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "error\":\"failed to fetch products",
+                        "description": "error\":\"Failed to fetch products",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -79,7 +79,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "error\":\"productId is required",
+                        "description": "error\":\"Invalid ID supplied",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -88,7 +88,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "error\":\"product not found",
+                        "description": "error\":\"Product not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -97,7 +97,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "error\":\"failed to fetch product",
+                        "description": "error\":\"Failed to fetch product",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -140,7 +140,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "error\":\"no items in order",
+                        "description": "error\":\"Invalid input",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -149,7 +149,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "error\":\"product not found",
+                        "description": "error\":\"Product not found",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -158,7 +158,7 @@ const docTemplate = `{
                         }
                     },
                     "422": {
-                        "description": "error\":\"invalid coupon code",
+                        "description": "error\":\"Validation exception",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -167,7 +167,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "error\":\"failed to place order",
+                        "description": "error\":\"Failed to place an order",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
