@@ -2,6 +2,26 @@
 
 A robust, modular food ordering backend and supporting library, designed for extensibility, performance, and developer productivity. This project features a RESTful API for product listing, cart management, and order processing, as well as a shared Go library for logging, configuration, and integrations. The platform includes an optimized coupon processing system capable of handling large files (1-2 GB) with parallel processing and resume functionality.
 
+
+## 🚀 What's Inside
+
+- ⚙️ Microservices with clear domain boundaries
+- 🌐 REST APIs with versioning
+- 🧪 Unit, integration, and contract tests
+- 🐳 Docker-based local dev environment
+- 🗃️ Mongodb integrations
+- 📊 Observability: Logging, Tracing, Metrics
+- 🔐 Secure config, secrets management, and auth hooks
+- 📦 DevTools: Task runners, hot reloads, linters, CI templates
+- 📁 Clean project layout (Go idiomatic)
+
+## 🎯 Purpose
+
+This repository is created as a reference implementation to:
+- Demonstrate **best practices** for building Go microservices
+- Highlight **developer productivity tools** for local and team workflows
+- Provide a **foundation** for production-grade Go backend systems
+
 ---
 
 ## 🚀 Latest Features & Improvements
