@@ -1,0 +1,46 @@
+version: '3.7'
+
+services:
+  orderfoodonline:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: backend-challenge/services/orderfoodonline/Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      - ENV=local
+    volumes:
+      - ./backend-challenge/services/orderfoodonline:/app # Bind mount the current directory to /app in the container
+    networks:
+      - go-network
+    depends_on:
+      - mongodb
+
+  coupons-processor:
+    platform: linux/amd64
+    build:
+      context: .
+      dockerfile: backend-challenge/services/coupons/Dockerfile
+    volumes:
+      - ./backend-challenge/services/coupons/data:/app/data
+    networks:
+      - go-network
+    depends_on:
+      - mongodb
+    healthcheck:
+      test: ["CMD", "pgrep", "coupons-processor"]
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    networks:
+      - go-network
+
+networks:
+  go-network:

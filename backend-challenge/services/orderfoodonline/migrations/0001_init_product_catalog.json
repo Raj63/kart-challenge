@@ -1,0 +1,90 @@
+{
+  "version": "0001",
+  "description": "Initialize product catalog with sample products",
+  "products": [
+    {
+      "id": "10",
+      "name": "Margherita Pizza",
+      "price": 12.99,
+      "category": "Pizza"
+    },
+    {
+      "id": "11",
+      "name": "Pepperoni Pizza",
+      "price": 14.99,
+      "category": "Pizza"
+    },
+    {
+      "id": "12",
+      "name": "Vegetarian Pizza",
+      "price": 13.99,
+      "category": "Pizza"
+    },
+    {
+      "id": "13",
+      "name": "Classic Burger",
+      "price": 8.99,
+      "category": "Burgers"
+    },
+    {
+      "id": "14",
+      "name": "Cheese Burger",
+      "price": 9.99,
+      "category": "Burgers"
+    },
+    {
+      "id": "15",
+      "name": "Veggie Burger",
+      "price": 7.99,
+      "category": "Burgers"
+    },
+    {
+      "id": "16",
+      "name": "Carbonara Pasta",
+      "price": 11.99,
+      "category": "Pasta"
+    },
+    {
+      "id": "17",
+      "name": "Bolognese Pasta",
+      "price": 10.99,
+      "category": "Pasta"
+    },
+    {
+      "id": "18",
+      "name": "Caesar Salad",
+      "price": 6.99,
+      "category": "Salads"
+    },
+    {
+      "id": "19",
+      "name": "Greek Salad",
+      "price": 7.99,
+      "category": "Salads"
+    },
+    {
+      "id": "20",
+      "name": "Cola",
+      "price": 2.99,
+      "category": "Beverages"
+    },
+    {
+      "id": "21",
+      "name": "Lemonade",
+      "price": 3.49,
+      "category": "Beverages"
+    },
+    {
+      "id": "22",
+      "name": "Chocolate Cake",
+      "price": 5.99,
+      "category": "Desserts"
+    },
+    {
+      "id": "23",
+      "name": "Tiramisu",
+      "price": 6.99,
+      "category": "Desserts"
+    }
+  ]
+} 

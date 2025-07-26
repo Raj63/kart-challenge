@@ -1,0 +1,52 @@
+package middlewares
+
+import (
+	"library/logger"
+	"net/http"
+	"strings"
+
+	"github.com/gin-gonic/gin"
+)
+
+// auth provides authentication and authorization middleware.
+type auth struct {
+	logger logger.ILogger
+}
+
+// NewAuthMiddleware creates a new instance of auth middleware which implements AuthMiddleware.
+func NewAuthMiddleware(logger logger.ILogger) AuthMiddleware {
+	return &auth{logger: logger}
+}
+
+// Authentication middleware to protect routes
+func (a *auth) Authenticate() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		apiKey := strings.TrimSpace(c.GetHeader("api_key"))
+		if apiKey == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "API key required"})
+			c.Abort()
+			return
+		}
+
+		// Example validation (replace with your actual logic)
+		const validAPIKey = "apitest"
+
+		if apiKey != validAPIKey {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid API key"})
+			c.Abort()
+			return
+		}
+
+		c.Next()
+	}
+}
+
+// Authorize middleware to protect resources from bad access
+func (a *auth) Authorize() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// logic to verify user access could go here (if necessary)
+
+		// If everything is fine, continue to the next handler
+		c.Next()
+	}
+}

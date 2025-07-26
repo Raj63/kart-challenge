@@ -1,0 +1,85 @@
+default_stages: [pre-commit]
+
+fail_fast: true
+
+repos:
+  - repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+      - id: gitlint
+        name: Git - Check Commit Message
+
+  - repo: https://github.com/tekwizely/pre-commit-golang
+    rev: v1.0.0-rc.1
+    hooks:
+      #
+      # Go Build
+      #
+      - id: go-build-mod
+      #
+      # Go Mod Tidy
+      #
+      - id: go-mod-tidy
+      #
+      # StaticCheck
+      #
+      - id: go-staticcheck-mod
+      #
+      # Formatters
+      #
+      - id: go-fmt
+      #
+      # Style Checkers
+      #
+      - id: go-lint
+      #
+    # Invoking Custom Go Tools
+  - repo: local
+    hooks:
+      - id: vet-library
+        name: Go Vet for library
+        entry: bash -c "cd ./backend-challenge/library && go vet ./..."
+        language: system
+
+      - id: vet-coupons
+        name: Go Vet for coupons
+        entry: bash -c "cd backend-challenge/services/coupons && go vet ./..."
+        language: system
+
+      - id: vet-orderfoodonline
+        name: Go Vet for orderfoodonline
+        entry: bash -c "cd backend-challenge/services/orderfoodonline && go vet ./..."
+        language: system
+
+      - id: gosec-library
+        name: GoSec - Scan library
+        entry: bash -c "cd backend-challenge/library && gosec ./..."
+        language: system
+        pass_filenames: false
+
+      - id: gosec-coupons
+        name: GoSec - Scan coupons
+        entry: bash -c "cd backend-challenge/services/coupons && gosec ./..."
+        language: system
+        pass_filenames: false
+
+      - id: gosec-orderfoodonline
+        name: GoSec - Scan orderfoodonline
+        entry: bash -c "cd backend-challenge/services/orderfoodonline && gosec ./..."
+        language: system
+        pass_filenames: false
+
+      - id: test-library
+        name: Go Test for library module
+        entry: make precommit-library
+        language: system
+
+      - id: service-precommit-coupons
+        name: Generate Coupons - Docs/Mocks, build and tests
+        entry: make precommit-coupons
+        language: system
+
+      - id: service-precommit-orderfoodonline
+        name: Generate orderfoodonline - API Docs/Mocks, build and tests
+        entry: make precommit-orderfoodonline
+        language: system

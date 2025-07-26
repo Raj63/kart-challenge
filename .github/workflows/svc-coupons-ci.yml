@@ -1,0 +1,15 @@
+name: svc-coupons - CI
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  code-quality:
+    name: Code Quality
+    uses: ./.github/workflows/reusable-code-quality-go.yml
+    with:
+      check-build-status: true
+      build-path: ./cmd/processor
+      target: backend-challenge/services/coupons

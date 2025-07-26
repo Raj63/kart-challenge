@@ -1,0 +1,20 @@
+{
+    "env": "local",
+    "server": {
+        "port": 8080
+    },
+    "swagger": {
+        "file_path": "/cmd/rest/docs/swagger.json"
+    },
+    "logging": {
+        "level": "debug",
+        "output_to_file": true,
+        "log_dir": "/logs"
+    },
+    "database": {
+        "type": "mongodb",
+        "host": "mongodb",
+        "port": 27017,
+        "dbname": "foodonline"
+    }
+}

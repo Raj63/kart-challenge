@@ -83,6 +83,7 @@ web_modules/
 .cache
 .parcel-cache
 
+postman-results.json
 # Next.js build output
 .next
 out

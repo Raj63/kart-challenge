@@ -1,0 +1,18 @@
+{
+    "env": "local",
+    "logging": {
+        "level": "debug",
+        "output_to_file": true,
+        "log_dir": "/logs"
+    },
+    "database": {
+        "type": "mongodb",
+        "host": "mongodb",
+        "port": 27017,
+        "dbname": "foodonline"
+    },
+    "processor": {
+        "data_directory": "/app/data",
+        "batch_size": 1000
+    }
+}
